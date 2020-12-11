@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .item {
+      color: 'skyblue'
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script src="vdom.js"></script>
+  <script>
+    let vnode = createElement('div', { id: 'test' }, [
+      createElement('p', { key: 'a', style: { color: 'blue' } }, '节点1'),
+      createElement('p', { key: 'b', '@click': () => { alert('事件11') } }, '节点2'),
+      createElement('p', { key: 'c', class: 'item' }, '节点3'),
+      createElement('p', { key: 'd' }, '节点4'),
+
+    ]);
+    console.log(JSON.stringify(vnode, null, 2));
+
+    render(vnode, document.getElementById('app'))
+  </script>
+</body>
+
+</html>
