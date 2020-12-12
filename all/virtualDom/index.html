@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
-    .item {
-      color: 'skyblue'
+    .item-header {
+      font-size: 20px;
+      color: green
     }
   </style>
 </head>
@@ -16,16 +17,29 @@
   <div id="app"></div>
   <script src="vdom.js"></script>
   <script>
-    let vnode = createElement('div', { id: 'test' }, [
+    // 旧的 VNode
+    const prevVNode = createElement('div', null, [
       createElement('p', { key: 'a', style: { color: 'blue' } }, '节点1'),
-      createElement('p', { key: 'b', '@click': () => { alert('事件11') } }, '节点2'),
-      createElement('p', { key: 'c', class: 'item' }, '节点3'),
+      createElement('p', { key: 'b', '@click': () => { alert('呵呵') } }, '节点2'),
+      createElement('p', { key: 'c' }, '节点3'),
       createElement('p', { key: 'd' }, '节点4'),
+    ])
 
-    ]);
-    console.log(JSON.stringify(vnode, null, 2));
+    // 新的 VNode
+    const nextVNode = createElement('div', null, [
+      createElement('p', { key: 'd' }, '节点4'),
+      createElement('p', { key: 'a', style: { color: 'red' } }, '节点1'),
+      createElement('p', { key: 'b', '@click': () => { alert('哈哈') } }, '节点2'),
+      createElement('p', { key: 'f' }, '节点6'),
+      createElement('p', { key: 'e', class: "item-header" }, '节点5'),
+    ])
 
-    render(vnode, document.getElementById('app'))
+    render(prevVNode, document.getElementById('app'))
+
+    // 2秒后更新
+    setTimeout(() => {
+      render(nextVNode, document.getElementById('app'))
+    }, 1000)
   </script>
 </body>
 
