@@ -526,11 +526,168 @@ transformResponse: [function transformResponse(data) {
 }]
 ```
 
+##### 如何取消已经发送的请求
+
+```javascript
+import axios from 'axios'
+
+// 第一种取消方法
+axios.get(url, {
+  cancelToken: new axios.CancelToken(cancel => {
+    if (/* 取消条件 */) {
+      cancel('取消日志');
+    }
+  })
+});
+
+// 第二种取消方法
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+axios.get(url, {
+  cancelToken: source.token
+});
+source.cancel('取消日志');
+
+```
+
+源码
+
+```javascript
+// /cancel/CancelToken.js  -  11行
+function CancelToken(executor) {
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      return;
+    }
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+// /lib/adapters/xhr.js  -  159行
+if (config.cancelToken) {
+    config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+            return;
+        }
+        request.abort();
+        reject(cancel);
+        request = null;
+    });
+}
+```
 
 
 
+取消功能的核心是通过CancelToken内的`this.promise = new Promise(resolve => resolvePromise = resolve)`，
+得到实例属性`promise`，此时该`promise`的状态为`pending`
+通过这个属性，在`/lib/adapters/xhr.js`文件中继续给这个`promise`实例添加`.then`方法
+（`xhr.js`文件的159行`config.cancelToken.promise.then(message => request.abort())`）；
+
+在`CancelToken`外界，通过`executor`参数拿到对`cancel`方法的控制权，
+这样当执行`cancel`方法时就可以改变实例的`promise`属性的状态为`fulfilled`，
+从而执行`request.abort()`方法达到取消请求的目的。
+
+上面第二种写法可以看作是对第一种写法的完善，因为很多是时候我们取消请求的方法是用在本次请求方法外，
+例如，发送A、B两个请求，当B请求成功后，取消A请求。
+
+```javascript
+// 第1种写法：
+let source;
+axios.get(Aurl, {
+  cancelToken: new axios.CancelToken(cancel => {
+    source = cancel;
+  })
+});
+axios.get(Burl)
+.then(() => source('B请求成功了'));  //这个时候如果a早就请求成功了，也不影响
+
+// 第2种写法：
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+axios.get(Aurl, {
+  cancelToken: source.token
+});
+axios.get(Burl)
+.then(() => source.cancel('B请求成功了'));
+```
 
 
 
+##### 超时配置及处理
 
+```
+import axios from 'axios'
 
+axios.defaults.timeout = 3000;
+```
+
+```javascript
+// /adapters/xhr.js
+request.timeout = config.timeout;
+
+// /adapters/xhr.js
+// 通过createError方法，将错误信息合为一个字符串
+request.ontimeout = function handleTimeout() {
+  reject(createError('timeout of ' + config.timeout + 'ms exceeded', 
+    config, 'ECONNABORTED', request));
+};
+```
+
+自己在axios以外添加超时处理
+
+```
+axios().catch(error => {
+  const { message } = error;
+  if (message.indexOf('timeout') > -1){
+    // 超时处理
+  }
+})
+```
+
+允许携带token
+
+```
+import axios from 'axios'
+
+axios.defaults.withCredentials = true;
+```
+
+##### 改写验证成功或失败的规则validatestatus
+
+```
+自定义http状态码的成功、失败范围
+```
+
+```javascript
+import axios from 'axios'
+
+axios.defaults.validateStatus = status => status >= 200 && status < 300;
+
+```
+
+```javascript
+//每当 readyState 改变时，就会触发 onreadystatechange 事件,触发settle(resolve, reject, response);
+//传递给后续的then或catch
+
+function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+```
