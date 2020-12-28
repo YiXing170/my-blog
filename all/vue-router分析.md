@@ -131,3 +131,171 @@ window.addEventListener('pushState', function(e) {
 });
 ```
 
+##### 剖析VueRouter本质
+
+Vue项目引入VueRouter。
+
+1. 安装VueRouter，再通过`import VueRouter from 'vue-router'`引入
+2. 先 `const router = new VueRouter({...})`,再把router作为参数的一个属性值，`new Vue({router})`
+3. 通过Vue.use(VueRouter) 使得每个组件都可以拥有store实例  =>VueRouter拥有install方法
+
+
+
+```javascript
+//myVueRouter.js
+
+class VueRouter{
+
+}
+
+VueRouter.install = function () {
+
+    
+
+}
+
+export default VueRouter
+
+```
+
+
+
+分析Vue.use(plugin)
+
+{ Object | Function } plugin
+
+如果插件是一个对象，必须提供install方法。如果插件是一个函数，它会被作为install方法。调用install方法时，会将Vue作为参数传入。install方法被同一个插件多次调用时，插件也只会被安装一次。
+
+1、插件的类型，可以是install方法，也可以是一个包含install方法的对象。
+
+2、插件只能被安装一次，保证插件列表中不能有重复的插件
+
+实现
+
+```javascript
+Vue.use = function(plugin){
+	const installedPlugins = (this._installedPlugins || (this._installedPlugins = []));
+	if(installedPlugins.indexOf(plugin)>-1){
+		return this;
+	}
+	<!-- 其他参数 -->
+	const args = toArray(arguments,1);
+	args.unshift(this);
+	if(typeof plugin.install === 'function'){
+		plugin.install.apply(plugin,args);
+	}else if(typeof plugin === 'function'){
+		plugin.apply(null,plugin,args);
+	}
+	installedPlugins.push(plugin);
+	return this;
+}
+
+```
+
+我们把Vue作为install的第一个参数，所以我们可以把Vue保存起来
+
+同时注册router-link和router-view组件
+
+```javascript
+//myVueRouter.js
+let Vue = null;
+class VueRouter{
+
+}
+VueRouter.install = function (v) {
+    Vue = v;
+   Vue.component('router-link',{
+        render(h){
+            return h('a',{},'首页')
+        }
+    })
+    Vue.component('router-view',{
+        render(h){
+            return h('h1',{},'首页视图')
+        }
+    })
+
+};
+
+export default VueRouter
+
+```
+
+install 一般是给每个vue实例添加东西的
+
+在这里就是**给每个组件添加$route和$router**。
+
+`$router`是VueRouter的实例对象，`$route`是当前路由对象，也就是说`$route`是`$router`的一个属性
+
+```javascript
+new Vue({
+  router,
+  render: function (h) { return h(App) }
+}).$mount('#app')
+```
+
+这里的Vue 是根组件啊。也就是说目前只有根组件有这个router值，而其他组件是还没有的，所以我们需要让其他组件也拥有这个router。
+
+继续完善
+
+```javascript
+//myVueRouter.js
+let Vue = null;
+class VueRouter{
+
+}
+VueRouter.install = function (v) {
+    Vue = v;
+    // 新增代码
+    Vue.mixin({
+        beforeCreate(){
+            if (this.$options && this.$options.router){ // 如果是根组件
+                this._root = this; //把当前实例挂载到_root上
+                this._router = this.$options.router;
+            }else { //如果是子组件
+                this._root= this.$parent && this.$parent._root
+            }
+            Object.defineProperty(this,'$router',{
+                get(){
+                    return this._root._router
+                }
+            })
+        }
+    })
+
+    Vue.component('router-link',{
+        render(h){
+            return h('a',{},'首页')
+        }
+    })
+    Vue.component('router-view',{
+        render(h){
+            return h('h1',{},'首页视图')
+        }
+    })
+};
+
+export default VueRouter
+
+
+```
+
+这里有个问题，为什么判断当前组件是子组件，就可以直接从父组件拿到_root根组件呢？这让我想起了曾经一个面试官问我的问题：**父组件和子组件的执行顺序**？
+
+> A：父beforeCreate-> 父created -> 父beforeMounte  -> 子beforeCreate ->子create ->子beforeMount ->子 mounted -> 父mounted
+
+可以得到，在执行子组件的beforeCreate的时候，父组件已经执行完beforeCreate了，那理所当然父组件已经有_root了。
+
+然后我们通过
+
+```
+Object.defineProperty(this,'$router',{
+  get(){
+      return this._root._router
+  }
+})
+```
+
+将`$router`挂载到组件实例上。
+
+其实这种思想也是一种代理的思想，我们获取组件的`$router`，其实返回的是根组件的`_root._router`
