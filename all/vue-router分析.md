@@ -15,7 +15,7 @@ hash一般用作锚点页面内进行导航，改变#后面的字段不会引起
 通过 hashchange 事件监听 URL 的变化，改变 URL 的方式只有这几种：
 
 1. 通过浏览器前进后退改变 URL
-2. 通过`[`](undefined)标签改变 URL
+2. 通过a标签改变 URL
 3. 通过window.location改变URL
 
 history 实现
@@ -282,7 +282,7 @@ export default VueRouter
 
 这里有个问题，为什么判断当前组件是子组件，就可以直接从父组件拿到_root根组件呢？这让我想起了曾经一个面试官问我的问题：**父组件和子组件的执行顺序**？
 
-> A：父beforeCreate-> 父created -> 父beforeMounte  -> 子beforeCreate ->子create ->子beforeMount ->子 mounted -> 父mounted
+> A：父beforeCreate-> 父created -> 父beforeMount  -> 子beforeCreate ->子create ->子beforeMount ->子 mounted -> 父mounted
 
 可以得到，在执行子组件的beforeCreate的时候，父组件已经执行完beforeCreate了，那理所当然父组件已经有_root了。
 
@@ -299,3 +299,210 @@ Object.defineProperty(this,'$router',{
 将`$router`挂载到组件实例上。
 
 其实这种思想也是一种代理的思想，我们获取组件的`$router`，其实返回的是根组件的`_root._router`
+
+```javascript
+const router = new VueRouter({
+  mode:"history",
+  routes
+})
+```
+
+
+
+当new VueRouter时传入了一个为数组的路由表routes，还有一个代表 当前是什么模式的mode。因此我们可以先这样实现VueRouter
+
+```javascript
+class VueRouter{
+    constructor(options) {
+        this.mode = options.mode || "hash"
+        this.routes = options.routes || [] //你传递的这个路由是一个数组表
+    }
+}
+
+```
+
+直接处理routes是十分不方便的，所以我们先要转换成`key：value`的格式
+
+```javascript
+//myVueRouter.js
+let Vue = null;
+class VueRouter{
+    constructor(options) {
+        this.mode = options.mode || "hash"
+        this.routes = options.routes || [] //你传递的这个路由是一个数组表
+        this.routesMap = this.createMap(this.routes)
+        console.log(this.routesMap);
+    }
+  //  '/url'=>'component'
+    createMap(routes){
+        return routes.reduce((pre,current)=>{
+            pre[current.path] = current.component
+            return pre;
+        },{})
+    }
+}
+```
+
+保存当前的路由信息
+
+```javascript
+//myVueRouter.js
+let Vue = null;
+class HistoryRoute {
+    constructor(){
+        this.current = null
+    }
+}
+class VueRouter{
+    constructor(options) {
+        this.mode = options.mode || "hash"
+        this.routes = options.routes || [] //你传递的这个路由是一个数组表
+        this.routesMap = this.createMap(this.routes) // 生成url到组件的映射
+        this.history = new HistoryRoute();  // 保存当前url
+        新增代码
+        this.init()
+
+    }
+    新增代码
+    init(){
+        if (this.mode === "hash"){
+            // 先判断用户打开时有没有hash值，没有的话跳转到#/
+            location.hash? '':location.hash = "/";
+            window.addEventListener("load",()=>{
+                this.history.current = location.hash.slice(1)
+            })
+            window.addEventListener("hashchange",()=>{
+                this.history.current = location.hash.slice(1)
+            })
+        } else{
+            location.pathname? '':location.pathname = "/";
+            window.addEventListener('load',()=>{
+                this.history.current = location.pathname
+            })
+            window.addEventListener("popstate",()=>{
+                this.history.current = location.pathname
+            })
+        }
+    }
+
+    createMap(routes){
+        return routes.reduce((pre,current)=>{
+            pre[current.path] = current.component
+            return pre;
+        },{})
+    }
+
+}
+```
+
+实现$route
+
+```javascript
+VueRouter.install = function (v) {
+    Vue = v;
+    Vue.mixin({
+        beforeCreate(){
+            if (this.$options && this.$options.router){ // 如果是根组件
+                this._root = this; //把当前实例挂载到_root上
+                this._router = this.$options.router;
+            }else { //如果是子组件
+                this._root= this.$parent && this.$parent._root
+            }
+            Object.defineProperty(this,'$router',{
+                get(){
+                    return this._root._router
+                }
+            });
+             // 新增代码  拿到current
+            Object.defineProperty(this,'$route',{
+                get(){
+                    return this._root._router.history.current
+                }
+            })
+        }
+    })
+    Vue.component('router-link',{
+        render(h){
+            return h('a',{},'首页')
+        }
+    })
+    Vue.component('router-view',{
+        render(h){
+            return h('h1',{},'首页视图')
+        }
+    })
+};
+```
+
+完善router-view组件
+
+我们已经保存了当前路径，也就是说现在我们可以获得当前路径，然后再根据当前路径从路由表中获取对应的组件进行渲染
+
+```javascript
+Vue.component('router-view',{
+    render(h){
+        let current = this._self._root._router.history.current   // self为代理对象
+        let routeMap = this._self._root._router.routesMap;
+        return h(routeMap[current])
+    }
+})
+```
+
+render函数里的this指向的是一个Proxy代理对象，代理Vue组件，而我们前面讲到每个组件都有一个_root属性指向根组件，根组件上有_router这个路由实例。所以我们可以从router实例上获得路由表，也可以获得当前路径。然后再把获得的组件放到h()里进行渲染。
+
+现在已经实现了router-view组件的渲染，但是有一个问题，就是你改变路径，视图是没有重新渲染的，所以需要将_router.history进行响应式化。
+
+```javascript
+Vue.mixin({
+    beforeCreate(){
+        if (this.$options && this.$options.router){ // 如果是根组件
+            this._root = this; //把当前实例挂载到_root上
+            this._router = this.$options.router;
+            新增代码
+            Vue.util.defineReactive(this,"xxx",this._router.history)
+        }else { //如果是子组件
+            this._root= this.$parent && this.$parent._root
+        }
+        Object.defineProperty(this,'$router',{
+            get(){
+                return this._root._router
+            }
+        });
+        Object.defineProperty(this,'$route',{
+            get(){
+                return this._root._router.history.current
+            }
+        })
+    }
+})
+
+```
+
+当我们第一次渲染**router-view**这个组件的时候，会去访问`this._router.history`这个对象，就会把**router-view**组件的依赖**wacther**收集到`this._router.history`对应的收集器**dep**中，因此`this._router.history`每次改变的时候。`this._router.history`对应的收集器**dep**就会通知**router-view**的组件依赖的**wacther**执行**update()**，从而使得`router-view`重新渲染（**其实这就是vue响应式的内部原理**）
+
+完善router-link组件
+
+link的使用
+
+```javascript
+<router-link to="/home">Home</router-link> 
+<router-link to="/about">About</router-link>
+```
+
+```javascript
+Vue.component('router-link',{
+    props:{
+        to:String
+    },
+    render(h){
+        let mode = this._self._root._router.mode;
+        let to = mode === "hash"?"#"+this.to:this.to
+        return h('a',{attrs:{href:to}},this.$slots.default)
+    }
+})
+```
+
+
+
+
+
