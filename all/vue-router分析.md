@@ -277,7 +277,6 @@ VueRouter.install = function (v) {
 
 export default VueRouter
 
-
 ```
 
 这里有个问题，为什么判断当前组件是子组件，就可以直接从父组件拿到_root根组件呢？这让我想起了曾经一个面试官问我的问题：**父组件和子组件的执行顺序**？
@@ -502,7 +501,7 @@ Vue.component('router-link',{
 })
 ```
 
-
+总结： Vue.use()进行 $router和$route 的挂载（此时并不是真正挂载，只是利用mixin ，让每个组件都有beforecreated钩子，其中作了 $router 和  $route 的代理，再 new VueRouter()得到全局router，在在new Vue（）中传进去router配置，每个组件执行beforecreated钩子后就会有 $  router 和 $ route 属性
 
 
 
