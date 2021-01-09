@@ -23,19 +23,19 @@ output: {
 ```
 ### loaders的概念
 > webpack 开箱即用只支持js和json，通过loaders去支持其他的文件类型，并把它们添加到依赖图中。
-loaders本身是一个函数，接收源文件作为参数，返回转换的结果
+> loaders本身是一个函数，接收源文件作为参数，返回转换的结果
 
 * 常见的loaders有哪些？
 
-名称 | 作用
----|---
-babel-loader | 转化es6 es7新特性语法
-css-loader | 支持css文件的加载和解析
-less-loader | 将less文件转化为css文件
-ts-loader | 将ts文件转化为js文件
-file-loader | 进行图片和字体的打包
-raw-loader |将文件以字符串的形式打包
-thread-loader |多进程打包js和css
+| 名称            | 作用              |
+| ------------- | --------------- |
+| babel-loader  | 转化es6 es7新特性语法  |
+| css-loader    | 支持css文件的加载和解析   |
+| less-loader   | 将less文件转化为css文件 |
+| ts-loader     | 将ts文件转化为js文件    |
+| file-loader   | 进行图片和字体的打包      |
+| raw-loader    | 将文件以字符串的形式打包    |
+| thread-loader | 多进程打包js和css     |
 
 * loaders的使用
 > test 指定规则， use指定loader
@@ -53,15 +53,15 @@ module: {
 
 * 常见的plugins有哪些？
 
-名称 | 作用
----|---
-CommonsChunkPlugin | 将chunks相同的代码提取到公共的js
-CleanWebpackPlugin| 清理构建目录（构建前）
-ExtractTextWebpackPlugin| 将bundle里的css提取成一个css文件
-CopyWebpackPlugin | 将文件(夹)拷贝到构建目录
-HtmlWebpackPlugin | 创建html文件去承载打包的js文件
-UglifyjsWebpackPlugin |压缩js（有一个压缩配置，自己去选择怎么压缩）
-ZipWebpackPlugin | 将打包的资源生成一个zip包
+| 名称                       | 作用                      |
+| ------------------------ | ----------------------- |
+| CommonsChunkPlugin       | 将chunks相同的代码提取到公共的js    |
+| CleanWebpackPlugin       | 清理构建目录（构建前）             |
+| ExtractTextWebpackPlugin | 将bundle里的css提取成一个css文件  |
+| CopyWebpackPlugin        | 将文件(夹)拷贝到构建目录           |
+| HtmlWebpackPlugin        | 创建html文件去承载打包的js文件      |
+| UglifyjsWebpackPlugin    | 压缩js（有一个压缩配置，自己去选择怎么压缩） |
+| ZipWebpackPlugin         | 将打包的资源生成一个zip包          |
 
 * 用法
 > 插件实例化
@@ -74,7 +74,7 @@ plugins: [
 ```
 ### mode的概念
  > mode用来指定当前的构建环境是none / production / development 。 设置mode可以使用webpack内置的函数
-，默认值是production。
+ > ，默认值是production。
 
 ### 解析es6和react
 + 先配置.babelrc文件（插件未配置）
@@ -87,7 +87,7 @@ plugins: [
 + 在配置babel-loader
 
 ```
- module: {
+ module: {   // 为什么叫模块,在node中不同的文件就是不同的模块，处理模块就是处理文件啦
     rules: [{
       test: /\.js$/,
       use: 'babel-loader'
@@ -141,7 +141,7 @@ plugins: [
   1. 启动webpack时带上`--watch`参数
   2. 在配置config文件中设置 `watch:true`
   3. 还是要去手动的刷新页面
-  
+
 ```
 {
     watch：true，
@@ -159,7 +159,7 @@ plugins: [
 + 利用的是webpack-dev-server插件和webpack.HotModuleReplacementPlugin 插件
 + 不需要再去刷新页面
 + 构建的产物是放在内存中的
- 
+
 ```
 {
     plugins: [
@@ -485,7 +485,7 @@ module.exports = {
 + 浏览器的全局变量window document；
 + 组件适配：将不兼容的组件根据打包环境进行适配
 + 请求适配：使用axios 或者isomorphic-fetch
-+  样式问题 node无法解析css
++ 样式问题 node无法解析css
     1. 服务端打包忽略css （ignore-loader ）
     2. 将style-loader换成isomorphic-style-loader
 + 替换掉打包出的html中的html占位符或数据占位，再返给浏览器。
@@ -630,7 +630,7 @@ new webpack.DllReferencePlugin({
 
 ### tree shaking
 + 是webpack4 自带的，擦除引入包中未使用的方法
-+  同样，也可对css做优化 使用插件 `purgecss-webpack-plugin`,但要和`mini-css-extract-plugin`配合使用
++ 同样，也可对css做优化 使用插件 `purgecss-webpack-plugin`,但要和`mini-css-extract-plugin`配合使用
 
 
 ```
@@ -719,7 +719,7 @@ module.exports = {
 + polyfill全部引入的话太大了，但是其他方案也有相应的缺点，
 + babel-runtime加  babel-plugin-transform-runtime插件，可以按需引入，但是不能导入实例方法
 + 动态polyfill 根据ua来判断不支持那些方法，就引入这些方法。
-使用方法是引入polyfill.io官方提供的script，或基于官方自建polyfill服务
+  使用方法是引入polyfill.io官方提供的script，或基于官方自建polyfill服务
 
 ### web商城的页面优化
 + 渲染优化
