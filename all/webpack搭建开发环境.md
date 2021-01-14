@@ -38,145 +38,233 @@ module.exports = {
 
 
 
-+ ##### babel
+##### babel
 
-  安装
+安装
 
-  ```
-  npm install babel-loader @babel/core -D    // @babel/core 是babel核心库
-  npm install @babel/preset-env @babel/preset-react -D
-  ```
+```
+npm install babel-loader @babel/core -D    // @babel/core 是babel核心库
+npm install @babel/preset-env @babel/preset-react -D
+```
 
-  babel的作用就不多说了，说说配置babel的文件，主要有以下两种
+babel的作用就不多说了，说说配置babel的文件，主要有以下两种
 
-  + .babelrc文件----针对项目中的文件进行编译
-  + babel.config.js----会影响整个项目中的代码，包含node_modules中的代码
++ .babelrc文件----针对项目中的文件进行编译
++ babel.config.js----会影响整个项目中的代码，包含node_modules中的代码
 
-  我这里选择babelrc的方式搭建
+我这里选择babelrc的方式搭建
 
-  ```javascript
-  {
-    "presets": [["@babel/preset-env"], "@babel/preset-react"],  //支持react中的jsx
-    "plugins": ["@babel/plugin-syntax-dynamic-import"]  //支持动态import
-  }
-  ```
+```javascript
+{
+  "presets": [["@babel/preset-env"], "@babel/preset-react"],  //支持react中的jsx和es6
+  "plugins": ["@babel/plugin-syntax-dynamic-import"]  //支持动态import
+}
+```
 
-  plugin代表要实现的一个语法功能，preset代表的是一系列plugin 的集合
+plugin代表要实现的一个语法功能，preset代表的是一系列plugin 的集合
 
-  说的通俗点：plugin相当于一个流量包，preset相当于一整个套餐
+说的通俗点：plugin相当于一个流量包，preset相当于一整个套餐
 
-  再说几个值得注意的点：
+再说几个值得注意的点：
 
-  1.   presets的执行顺序是倒序的，从后到前，和webpack配置中的use字段类似
+1.   presets的执行顺序是倒序的，从后到前，和webpack的loader配置中的use字段类似
 
-  2.   presets中的preset如果有参数传入，可以写成`["@babel/preset-env",{target:'default'}]`的形式
+2.   presets中的preset如果有参数传入，可以写成`["@babel/preset-env",{target:'default'}]`的形式
 
-  3.   @babel/preset-env只会转化js句法（语句，代码块），不会转化新的api，比如Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise等全局对象，以及一些定义在全局对象上的方法(Object.assign)都不会转化，所以需要引入`@ babel / polyfill`包，最常见的方式就是在入口文件的第一行写上:
+3.   @babel/preset-env只会转化js句法（语句，代码块），不会转化新的api，比如Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise等全局对象，以及一些定义在全局对象上的方法(Object.assign)都不会转化，所以需要引入`@ babel / polyfill`包，最常见的方式就是在入口文件的第一行写上:
 
-       ```javascript
+     ```javascript
        import '@babel/polyfill'   // 主要都是为了适配ie
-       ```
+     ```
 
        这种方式相应的缺点就是包全引入了，相应的按需的引入的方案肯定也有，这里就不赘述啦
 
-  babelrc配置完了，还需要在webpack的配置中注册babel-loader，将两者链接起来去解析js文件
+babelrc配置完了，还需要在webpack的配置中注册babel-loader，将两者链接起来去解析js文件
 
-  ```javascript
-  // ... 
-  module: {   
-      rules: [
-        {
-          test:/\.js$/,
-        	use:'babel-loader'
-        }
-      ]
-    },
-  // ...    
-  ```
+```javascript
+// ... 
+module: {   
+    rules: [
+      {
+        test:/\.js$/,
+      	use:'babel-loader'
+      }
+    ]
+  },
+// ...    
+```
 
-  ​
+​
 
-+ ##### css
+##### css
 
-  - css-loader用于解析 .css文件，转化为commonjs对象,这个对象有个toString方法，返回的是解析后的 css字符串
-  - style-loader将样式（也就是上文说的字符串）通过style标签插入到head中，所以css-loader必须和style-loader一起配合，样式才会生效
-  - loader加载的顺序是从右到左
-  - 注意css中文件可能有@import和url语句，需要其他 loader 的帮助，也就是 [file-loader]和 [url-loader]（下面会配置）
-  - 对于生产环境构建，建议从 bundle 中提取 CSS，以便之后可以并行加载 CSS/JS 资源。可以通过使用 [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) 来实现，在生产环境模式运行中提取 CSS，这里配的是开发环境就先不涉足了。
+- css-loader用于解析 .css文件，转化为commonjs对象,这个对象有个toString方法，返回的是解析后的 css字符串
+- style-loader将样式（也就是上文说的字符串）通过style标签插入到head中，所以css-loader必须和style-loader一起配合，样式才会生效
+- loader加载的顺序是从右到左
+- 注意css中文件可能有@import和url语句，需要其他 loader 的帮助，也就是 [file-loader]和 [url-loader]（下面会配置）
+- 对于生产环境构建，建议从 bundle 中提取 CSS，以便之后可以并行加载 CSS/JS 资源。可以通过使用 [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) 来实现，在生产环境模式运行中提取出 CSS文件，这里配的是开发环境就先不涉足了。
 
-  ```javascript
-  // ... 
-  module: {   
-      rules: [
-        {
-          test:/\.js$/,
-        	use:'babel-loader'
-        },
-        {
-          test:/\.css$/,
-        	use:['style-loader','css-loader']
-        },
-        {
-        	test: /\.less$/,
-        	use: ['style-loader', 'css-loader', 'less-loader']  //其实loader都可以传入配置的,具体去看文档吧
-        },										     // [{loader:'style-loader',options:{}},...]
-      ]
-    },
-  // ...   
-  ```
+```javascript
+// ... 
+module: {   
+    rules: [
+      {
+        test:/\.js$/,
+      	use:'babel-loader'
+      },
+      {
+        test:/\.css$/,
+      	use:['style-loader','css-loader']
+      },
+      {
+      	test: /\.less$/,
+      	use: ['style-loader', 'css-loader', 'less-loader']  //其实loader都可以传入配置的,具体去看文档吧
+      },										     // [{loader:'style-loader',options:{}},...]
+    ]
+  },
+// ...   
+```
 
-  ​
+​
 
+##### 图片和字体
 
-+ ##### 图片和字体
+- 一般是使用 url-loader解析图片和file-loader解析字体
 
-  - 一般是使用 url-loader解析图片和file-loader解析字体
+  - file-loader可以解析项目中的url引入（不仅限于css），根据我们的output配置，将图片拷贝到相应的路径，再根据我们的配置，修改打包后文件引用路径，使之指向正确的文件
 
-    - file-loader可以解析项目中的url引入（不仅限于css），根据我们的配置，将图片拷贝到相应的路径，再根据我们的配置，修改打包后文件引用路径，使之指向正确的文件
+  - ``` javascript
+    import img from '../images/1.jpg'
+    console.log(img)   // 500bfebd5072138a71038d256ff086ed.jpg--打包后的路径
+    ```
 
-    - ``` javascript
-      import img from '../images/1.jpg'
-      console.log(img)   // 500bfebd5072138a71038d256ff086ed.jpg--不额外配置默认在dist目录下
-      ```
+- url-loader内置了file-loader
 
-  - url-loader内置了file-loader
+- 当使用url-loader加载图片，图片大小小于上限值，则将图片转base64字符串；否则使用file-loader加载图片，都是为了提高浏览器加载图片速度。
 
-  - 当使用url-loader加载图片，图片大小小于上限值，则将图片转base64字符串；否则使用file-loader加载图片，都是为了提高浏览器加载图片速度。
+```javascript
+// ... 
+module: {   
+    rules: [
+      {
+        test:/\.js$/,
+      	use:'babel-loader'
+      },
+      {
+        test:/\.css$/,
+      	use:['style-loader','css-loader']
+      },
+      {
+      	test: /\.less$/,
+      	use: ['style-loader', 'css-loader', 'less-loader']  //其实loader都可以传入配置的,具体去看文档吧
+      },										     // [{loader:'style-loader',options:{}},...]
+      {
+        test: /\.(png|gif|svg|jpg|jpeg)$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 10240, //上限值
+            name: '[path][name].[ext]'  //定义图片的名字，不然名字就是一串md5
+            outputPath: 'images/'   // 把图片都打包到这个目录下，不然默认在dist目录
+          }
+        }]
+      },
+      {
+        test: /\.(woff2?|eot|ttf)$/,
+        use: 'file-loader'
+      }
+    ]
+  },
+// ...   
+```
 
-  ```javascript
-  // ... 
-  module: {   
-      rules: [
-        {
-          test:/\.js$/,
-        	use:'babel-loader'
-        },
-        {
-          test:/\.css$/,
-        	use:['style-loader','css-loader']
-        },
-        {
-        	test: /\.less$/,
-        	use: ['style-loader', 'css-loader', 'less-loader']  //其实loader都可以传入配置的,具体去看文档吧
-        },										     // [{loader:'style-loader',options:{}},...]
-        {
-          test: /\.(png|gif|svg|jpg|jpeg)$/,
-          use: [{
-            loader: 'url-loader',
-            options: {
-              limit: 10240,
-              name: '[path][name].[ext]'  //定义图片的名字，不然名字就是一串md5
-              outputPath: 'images/'   // 把图片都打包到这个目录下，不然默认在dist目录
-            }
-          }]
-        },
-        {
-          test: /\.(woff2?|eot|ttf)$/,
-          use: 'file-loader'
-        }
-      ]
-    },
-  // ...   
-  ```
+##### webpack中的文件监听
 
-  ​
+- 文件监听是在源码发生变化时自动构建出新的输出文件
+- webpack开启文件监听有两种方式
+  1. 启动webpack时带上`--watch`参数
+  2. 在配置config文件中设置 `watch:true`
+- 几个值得注意的点
+  1. 监听时会自动打包构建，但还是要手动刷新浏览器，页面才会发生变化
+  2. webpack中利用`chokidar` 包实现了监听功能，原理是利用node中的`fs.watch(filename[, options][, listener])` 来实现的
+  3. ​
+
+```
+{
+	//...
+    watch：true，
+    watchOptions:{
+        ignored:/node_modules/, // 不做监听
+        // 延迟300 毫秒再去访问
+        aggregateTimeout:300,
+        // 每隔一秒访问一次
+        poll:1000  // 效率不太好
+    }
+}
+```
+
+##### webpack热更新
+
+首先区分实时加载（Live Reload）和热加载（Hot Reload）的区别：实时加载应用更新时需要刷新当前页面，可以看到明显的全局刷新效果，而热加载基本上看不出刷新的效果，类似于局	部刷新。
+
++   webpack文档里常说的HMR（Hot Module Replacement）属于热加载（Hot Reload）
+
+实现HMR需要安装`webpack-dev-server` 包，然后在config中配置
+
+```javascript
+{
+  //...
+  devServer: {
+    hot: true,   //启动热更新
+    stats: 'errors-only',
+    contentBase: './dist'
+  },
+  //...
+}
+```
+
+注意scripts中命令也要做修改
+
+```javascript
+"dev": "webpack-dev-server --config webpack.dev.js --open", //config指定配置文件，open自动打开浏览器
+```
+
+浏览器打开后发现并没有要访问的页面
+
+原因是利用webpack-dev-server构建生成的资源中并不包含html文件，自然也就访问不到页面
+
+所以再安装`html-webpack-plugin` 插件,作用是按照模板文件（也可以不使用模板）生成一个html文件，这个html文件会自动引入相关的js css路径
+
+```javascript
+plugins: [
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, './src/search/index.html'),
+      filename: 'index.html'
+    })
+  ],
+```
+
+现在实测运行npm run dev就已经完成热更新了，但是很多教程里面都还在插件数组里还安装了
+
+> plugins: [new webpack.HotModuleReplacementPlugin(), ...],
+
+其实，没有必要，在webpack-dev-server内部会有检测机制
+
+```javascript
+if (options.hot || options.hotOnly) {
+  config.plugins = config.plugins || [];
+  if (
+    !config.plugins.find(
+      // Check for the name rather than the constructor reference in case
+      // there are multiple copies of webpack installed
+      (plugin) => plugin.constructor.name === 'HotModuleReplacementPlugin'
+    )
+  ) {
+    config.plugins.push(new webpack.HotModuleReplacementPlugin()); //配置了devServer.hot为true就会追加插件
+  }
+}
+```
+
+以下是几个值得注意的点
+
++ ​
