@@ -148,7 +148,8 @@ module: {
    ```javascript
 
    // config 为导出的整个配置对象
-   // config.optimization.minimizer 可以用来覆盖压缩时的一些默认行为，像对注释的处理，修改压缩配置等（文档看的头大）
+   // config.optimization.minimizer 可以用来覆盖压缩时的一些默认行为，像对注释的处理，修改压缩配置等（自定义）
+   // 像生产时去除console，也是在这里配置的
    optimization: {
        minimizer: [
          new TerserPlugin({
@@ -159,4 +160,146 @@ module: {
    },
    ```
 
-   ​
+2. css压缩
+
+   ```javascript
+   // 需要安装插件optimize-css-assets-webpack-plugin  和包cssnano
+   // cssnano能和插件optimize-css-assets-webpack-plugin配合，也能和postcss-loader一起使用
+   // nano的释义为 毫微/纳米
+   new OptimizeCssAssetsPlugin({
+         assetNameRegexp: /\.css$/,
+         cssProcess: require('cssnano')  
+       })
+   ```
+
+3. html压缩
+
+   html的压缩还是运用之前讲到的html-webpack-plugin，具体配置详情可看https://blog.csdn.net/zhaoruda/article/details/74859338
+
+   ```javascript
+   plugins: [
+       new MiniCssExtractPlugin({
+         filename: '[name]_[contenthash:8].css'
+       }),
+       // css 压缩
+       new OptimizeCssAssetsPlugin({
+         assetNameRegexp: /\.css$/,
+         cssProcess: require('cssnano')
+       }),
+       // html 压缩
+       new HtmlWebpackPlugin({
+         template: path.join(__dirname, './src/search.html'),
+         filename: 'search.html',
+         chunks: ['search'],   //只包含search chunk ，多页面打包时，只引入search模块相关的css/js
+         inject: true, // 注入css和js
+         minify: {   // 压缩的主要配置
+           html5: true,  // 按照html5的规范输出
+           collapseWhitespace: true, // 与preserveLinebreak一起配合压缩html空白部分，必须同时使用
+           preserveLinebreak: true,
+           minifyCSS: true,  // 压缩style中css样式
+           minifyJS: true,	// 压缩script中js
+           removeComments: true  //移除注释
+         }
+       })
+     ]
+   ```
+
+4. 压缩图片
+
+   - 推荐使用 image-webpack-loader
+   - 有很多定制选项，可以引入更多第三方库优化，如pngquant，可以处理多种图片格式
+
+   ```javascript
+   {
+         test: /\.(png|gif|svg|jpg|jpeg)$/,
+         use: [{
+           loader: 'url-loader',
+           options: {
+             limit: 10240,
+             name: 'img/[name]_[hash:8].[ext]',
+
+           }
+         },
+         {
+           loader: 'image-webpack-loader',
+           options: {
+             mozjpeg: {
+               progressive: true,
+               quality: 65
+             },
+             // optipng.enabled: false will disable optipng
+             optipng: {
+               enabled: false,
+             },
+             pngquant: {
+               quality: [0.65, 0.90],
+               speed: 4
+             },
+             gifsicle: {
+               interlaced: false,
+             },
+             // the webp option will enable WEBP
+             webp: {
+               quality: 75
+             }
+           }
+         }
+         ]
+    },
+   ```
+
+
+
+##### 速度优化
+
+前面的压缩其实是体积优化的一部分，现在讲讲构建速度的优化，无外乎就是开启缓存，多进程打包等等
+
+多进程打包,使用thread-loader
+
+>文档介绍：
+>
+>把这个 loader 放置在其他 loader 之前， 放置在这个 loader 之后的 loader 就会在一个单独的 worker 池(worker pool)中运行
+>
+>在 worker 池(worker pool)中运行的 loader 是受到限制的。例如：
+>
+>- 这些 loader 不能产生新的文件。
+>- 这些 loader 不能使用定制的 loader API（也就是说，通过插件）。
+>- 这些 loader 无法获取 webpack 的选项设置。
+>
+>每个 worker 都是一个单独的有 600ms 限制的 node.js 进程。同时跨进程的数据交换也会被限制。
+>
+>**请仅在耗时的 loader 上使用**
+
+根据最后一句其实知道，这个load最佳的使用地方是在babel-loader（耗时）,同时也开启babel-loader 的缓存
+
+```javascript
+{
+      test: /\.js$/,
+      use: [
+        {
+        	loader: 'thread-loader',
+        	options: {
+         	   workers: 3   //开启的最大进程
+        	}
+      	},
+        'babel-loader?cacheDirectory=true'   //开启babel-loader 的缓存
+      ],
+},
+```
+
+```javascript
+ // 开启压缩的缓存
+ optimization: {
+        minimizer: [
+          new TerserPlugin({
+            cache: true,  //开启
+            parallel: true  //使用多进程并发运行以提高构建速度
+          })
+        ]
+  }
+  plugins:[
+    new HardSourceWebpackPlugin(), // HardSourceWebpackPlugin是webpack的插件，为模块提供中间缓存步骤。为了查									看结果，您需要使用此插件运行webpack两次：第一次构建将花费正常的时间。第										二次构建将显着加快（大概提升90%的构建速度）
+    ...							 // 能不能提升开发时的编译速度？等我去试下			
+  ]  
+```
+
