@@ -299,7 +299,83 @@ module: {
   }
   plugins:[
     new HardSourceWebpackPlugin(), // HardSourceWebpackPlugin是webpack的插件，为模块提供中间缓存步骤。为了查									看结果，您需要使用此插件运行webpack两次：第一次构建将花费正常的时间。第										二次构建将显着加快（大概提升90%的构建速度）
-    ...							 // 能不能提升开发时的编译速度？等我去试下			
+    ...							 // 也能运用到dev环境，提升npm run server的启动速度			
   ]  
 ```
+
+还有一些其他方案，像dll处理（Webpack DLLPlugin），打包出来的DLL文件相当于我们项目的**工程基础包，** 下次构建就不需要再去打包这些基础包，简单的配置如下：
+
+将公共包(react /react-dom /redux) 抽离成一个文件，单独起一个webpack.dll..js
+
+```
+//webpack.dll.js
+
+const path = require('path');
+const webpack = require('webpack')
+module.exports = {
+  entry: {
+    library: ['react', 'react-dom']
+  },
+  output: {
+    filename: '[name].dll.js',    // 此处的name值为入口key --library
+    path: path.join(__dirname, 'build/library'),  // 生成的文件都在build/library下
+    library: '[name]'
+  },
+  plugins: [
+    new webpack.DllPlugin({
+      name: '[name]_[hash]',
+      path: path.join(__dirname, 'build/library/[name].json')
+    })
+  ]
+}
+```
+
+再运行    webpack --config webpack.dll.js  命令
+
+会在当前配置的目录下生成
+
+> /build/library/library.dll.js   //源码文件
+>
+> /build/library/library.json  // 访问node_modules 中的react时  映射到 上面的源码文件
+
+
+
+项目引用的时候直接配置prod文件即可
+
+同样，其他项目需要react和react-dom ，自己把
+
+```
+// 在webpack.prod.js中引入
+//...
+new webpack.DllReferencePlugin({
+      context: path.join(__dirname, 'build/library'),
+      manifest:require('./build/library/library.json')
+    })
+    
+//...
+```
+
+引用文件，这一步，经常会被忘记。一定要在HtmlWebpackPlugin的template 模版html文件中，手动引入    /build/library/library.dll.js文件
+
+总结：
+
+webpack DllPlugin优化，使用于将项目依赖的基础模块（第三方模块）抽离出来，然后打包到一个个单独的动态链接库中。当下一次打包时，通过webpackReferencePlugin，如果打包过程中发现需要导入的模块存在于某个动态链接库中，就不能再次被打包，而是去动态链接库中get到。
+
+##### tree shaking
+
+面试很喜欢问的一个webapck问题
+
+- import导入时，未使用的方法和未导入的方法
+- dead code 如 `if(false) a()`
+- mode设置为production即会触发tree shaking
+
+##### scope hoisting
+
+可以简单的把scope hoisting理解为是把每个模块被webpack处理成的模块初始化函数整理到一个统一的包裹函数里，也就是把多个作用域用一个作用域取代，以减少内存消耗并减少包裹块代码，从每个模块有一个包裹函数变成只有一个包裹函数包裹所有的模块，但是有一个前提就是，当模块的引用次数大于1时，比如被引用了两次或以上，那么这个效果会无效，也就是被引用多次的模块在被webpack处理后，会被独立的包裹函数所包裹
+
+##### 代码分割和动态import
+
+分割chunks:两种方案 require.ensure() 和 动态import
+
+- 动态import要使用插件@babel/plugin-syntax-dynamic-import
 
