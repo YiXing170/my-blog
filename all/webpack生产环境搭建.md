@@ -363,15 +363,76 @@ webpack DllPlugin优化，使用于将项目依赖的基础模块（第三方模
 
 ##### tree shaking
 
-面试很喜欢问的一个webapck问题
+面试很喜欢问的一个webapck问题，关键点如下：
 
-- import导入时，未使用的方法和未导入的方法
+- import导入时，擦除未使用的方法和未导入的方法（Tree Shaking只支持ES6的 ES module，如果项目中使用了babel的话， `@babel/preset-env` 默认将模块转换成CommonJs语法，因此需要设置`module：false`，webpack2后已经支持ESModule
+
 - dead code 如 `if(false) a()`
+
 - mode设置为production即会触发tree shaking
+
+- 导入的模块没用使用过，按道理说，tree shaking一般会将它去掉，但当这个模块有副作用时，tree shaking就会保留副作用代码，但是也可强制将这个模块去掉，在package.json中设置 :
+
+  + "sideEffects":false,  表示不去管副作用的代码，强制删除，true表示保留副作用代码
+
+  ```javascript
+  //module.js
+  export var a = (function () {
+  	console.log(11111111)
+  	return b;
+  })()
+   
+  export function b() {
+  	return '22222222222';
+  }
+   
+  export function c() {
+  	return '333333333333';
+  }
+
+  // index.js
+  import { a,b,c } from "./module";
+
+  // 当 "sideEffects":false ，标识没有副作用  =>运行npm run build后,没有搜到任何的 111 or 2222。证明没有打包进来。
+
+  // 当 "sideEffects":true 标识有副作用 =>a,b打包进来，c没有打包进来
+  ```
 
 ##### scope hoisting
 
 可以简单的把scope hoisting理解为是把每个模块被webpack处理成的模块初始化函数整理到一个统一的包裹函数里，也就是把多个作用域用一个作用域取代，以减少内存消耗并减少包裹块代码，从每个模块有一个包裹函数变成只有一个包裹函数包裹所有的模块，但是有一个前提就是，当模块的引用次数大于1时，比如被引用了两次或以上，那么这个效果会无效，也就是被引用多次的模块在被webpack处理后，会被独立的包裹函数所包裹
+
+```javascript
+
+//my-module.js
+export const name = 123;
+export const age = 9999;
+
+//index.js
+import {name, age} from './test.js';
+console.log(name);
+
+
+//被打包到一个作用域内
+(function(module, __webpack_exports__, __webpack_require__) {
+  //...
+  //CONCATENATED MODULE: ./src/my-module.js  // CONCATENATED MODULE为webpack打的标记，表示模块被打包在同一作用域内
+  var test_name = 123;
+  var age = 9999;
+  //CONCATENATED MODULE: ./src/index.js
+  console.log(test_name);
+}
+// 然后被压缩时精简为
+ (function(module, __webpack_exports__, __webpack_require__) {
+  //...
+  //CONCATENATED MODULE: ./src/my-module.js
+  //var test_name = 123;
+  // var age = 9999;
+  //CONCATENATED MODULE: ./src/index.js
+  console.log(123);
+}
+ 
+```
 
 ##### 代码分割和动态import
 
@@ -379,3 +440,30 @@ webpack DllPlugin优化，使用于将项目依赖的基础模块（第三方模
 
 - 动态import要使用插件@babel/plugin-syntax-dynamic-import
 
+
+```javascript
+{
+  "presets": [["@babel/preset-env"], "@babel/preset-react"],
+  "plugins": ["@babel/plugin-syntax-dynamic-import"]
+}
+```
+
+```javascript
+// index.js 
+handleClick(){
+//动态import的方法
+    import('./dynamicImport.js').then((value)=>{
+      this.setState({Text:value.default})
+    })
+ }
+  
+  
+// ./dynamicImport.js 文件
+
+import React from 'react';
+export default() => <span>动态引入的内容</span>;
+```
+
+
+
+参考文章：[treeshaking 原理](https://mp.weixin.qq.com/s?__biz=MzI1NDYzMjA4NQ==&mid=2247483742&idx=1&sn=ed71531685e62f33c138773fab5371ee&chksm=e9c308a4deb481b229e97744f3eea713f876b4bcf7e16ebcad31e661d9446d98869a836bec0e&scene=21#wechat_redirect)
