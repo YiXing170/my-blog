@@ -466,4 +466,94 @@ export default() => <span>动态引入的内容</span>;
 
 
 
+
+
+简单配置就到这里了，有一些点还没有说到，像多页面打包，打包一个库文件等等
+
+直接贴配置吧
+
+##### 多页面打包
+
++ 一般是通过glob包去动态匹配，再生成entry对象，和htmlWebpackPlugin 数组，最后添加到配置中就行了
+
+```javascript
+// glob包用来匹配文件名  用 '*'来代替要匹配的部分，返回匹配到的每个文件的整个路径
+
+const setMpa = () => {
+  const entry = {};
+  const htmlWebpackPlugin = [];
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js')); // return Array<String>
+  entryFiles.map(file => {
+    const match = file.match(/src\/(.*)\/index\.js/);
+    const pageName = match && match[1];  // 拿到具体的文件目录名
+    entry[pageName] = file;
+    htmlWebpackPlugin.push(
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, `./src/${pageName}/index.html`),
+        filename: `${pageName}.html`,
+        chunks: [pageName],
+        inject: true,
+        minify: {
+          html5: true,
+          collapseWhitespace: true,
+          preserveLinebreak: false,
+          minifyCSS: true,
+          minifyJS: true,
+          removeComments: false
+        }
+      })
+    )
+  })
+  return {                     
+    entry,              // 生成的entry对象
+    htmlWebpackPlugin   // 生成的实例化插件数组
+  }
+}
+
+const {entry,htmlWebpackPlugin} =setMpa()
+// 使用方式
+entry:entry
+plugins：[...].concat(htmlWebpackPlugin)
+```
+
+##### webpack打包组件和基础库
+
+```javascript
+const TerserPlugin = require('terser-webpack-plugin');
+module.exports = {
+  entry: {
+    'large-number': './src/index.js',
+    'large-number.min': './src/index.js'
+  },
+  output: {
+    filename: '[name].js',
+    library: 'largeNumber',  //打包出来的库名
+    libraryTarget: 'umd',    // 打包出来的库遵守的模块规范
+    libraryExport: 'default'  // 打包出来的模块，当引入的时候挂载在哪里   default=>导出为一个变量
+  },
+  mode: 'none',
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        include: /\.min\.js/，  // 匹配到 .min.js 才压缩
+        // parallel:true //开启并行打包，优化构建速度
+      })
+    ]
+  }
+}
+```
+
+
+
+简单的配置就写到这里吧，没办法，webpack的文章确实难写的生动有趣的，更何况我自己也还有有很多不懂的地方，但写完文章也是有些收获的，起码去看vue-cli的webpack的配置，大部分配置都你知道是干什么的，也不错啦
+
+如果有错误的地方，请提醒我更正，毕竟文章写的非常仓促。
+
+下一篇文章是准备理一理webpack的一些原理性的东西，但不会很深入。
+
+
+
 参考文章：[treeshaking 原理](https://mp.weixin.qq.com/s?__biz=MzI1NDYzMjA4NQ==&mid=2247483742&idx=1&sn=ed71531685e62f33c138773fab5371ee&chksm=e9c308a4deb481b229e97744f3eea713f876b4bcf7e16ebcad31e661d9446d98869a836bec0e&scene=21#wechat_redirect)
+
+​		  极客时间-玩转webpack
