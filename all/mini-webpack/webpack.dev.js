@@ -13,12 +13,13 @@ module.exports = {
   module: {
     rules: [{
       test: /\.js$/,
-      use: 'babel-loader'
+      // use: 'babel-loader'
+      use: path.join(__dirname, '/myLoader.js')
     }]
   },
-  resolveLoader: {
-    alias: {
-      "babel-loader": './myLoader'
-    }
-  },
+  // resolveLoader: {
+  //   alias: {
+  //     "babel-loader": './myLoader'
+  //   }
+  // },
 }
