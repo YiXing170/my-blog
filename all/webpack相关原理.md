@@ -59,7 +59,7 @@ var installedModules = {};  //缓存对象
       l: false,
       exports: {}
     };
-    // Execute the module function  执行模块函数
+    // Execute the module function  执行模块函数 模块内的this指向module.export
     modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
     // Flag the module as loaded  标示模块已经加载完毕
     module.l = true;

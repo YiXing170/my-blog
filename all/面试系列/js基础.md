@@ -165,3 +165,41 @@ console.log('Inside Global Execution Context');
 1. 黑白七巧板组成的形状，拆分出来得到零件（`ES6/ES7` 解析成 `AST`）
 2. 将这些零件换成彩色的（`AST` 编译得到新 `AST`）
 3. 将彩色零件拼装成新的形状（`AST` 转换为 `ES5`）
+
+
+
+##### 模块化
+
+几种模块规范：
+
+common.js规范，CMD AMD es6模块
+
+common.js就是node中模块那一套，
+
+1. 所有代码在模块作用域内运行，不会污染其他文件
+2. `require` 得到的值是值的拷贝，即你引用其他 JS 文件的变量，修改操作了也不会影响其他文件
+
+common.js是同步的，引申出异步的规范
+
+可以采用异步方式加载模块。`AMD` 是 `Asynchronous Module Definition` 的缩写，也就是 “异步模块定义”，记住这个 `async` 就知道它是异步的了。
+
+又由AMD规范中导致的依赖前置的问题，又发明CMD
+
+CMD (Common Module Definition), 是 seajs 推崇的规范，CMD 则是依赖就近，用的时候再 `require`。
+
+AMD 和 CMD 最大的区别是对依赖模块的执行时机处理不同，注意不是加载的时机或者方式不同，二者皆为异步加载模块。
+
+随着es的发展，官方也开始搞自己的模块化，也就是es模块
+
+1.  `export` 命令和 `import` 命令可以出现在模块的任何位置，只要处于模块顶层就可以。 如果处于块级作用域内，就会报错，这是因为处于条件代码块之中，就没法做静态优化了，违背了 ES6 模块的设计初衷。
+2. `import` 命令具有提升效果，会提升到整个模块的头部，首先执行。
+
+es模块和common.js模块的区别：
+
++ `CommonJS` 模块是运行时加载，`ES6 Modules` 是编译时输出接口,也就是前面说`import` 命令会提升
++ `CommonJS` 输出是值的拷贝；`ES6 Modules` 输出的是值的引用，被输出模块的内部的改变会影响引用的改变
+  + 从webpac的打包出来的函数看到，import的变量是存在闭包里，模块的内部的改变会影响到变量，并且这个变量在模块外利用getter，设置为只读
+  + CommonJS中导出的变量挂载在exports上，对原始值来说就是拷贝，但对挂载的对象来说，还是可以改变对象的属性的
++ `CommonJs` 导入的模块路径可以是一个表达式，因为它使用的是`require()` 方法；而 `ES6 Modules` 只能是字符串
++ `CommonJS this` 指向当前模块，`ES6 Modules` 的 `this` 指向 `undefined`
++ `ES6 Modules` 中没有这些顶层变量：`arguments`、`require`、`module`、`exports`、`__filename`、`__dirname`
