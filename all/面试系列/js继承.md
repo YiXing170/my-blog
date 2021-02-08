@@ -24,8 +24,6 @@ SubType.prototype.getSubValue = function() {
 
 var instance = new SubType();
 console.log(instance.getSuperValue()); // true
-
-
 ```
 
 原型链方案存在的缺点：多个实例对引用类型的操作会被篡改。
@@ -227,7 +225,7 @@ function SubType(name, age){
   this.age = age;
 }
 
-// 将父类原型指向子类
+// 将父类原型指向子类实例的__proto__上
 inheritPrototype(SubType, SuperType);
 
 // 新增子类原型属性
@@ -318,3 +316,291 @@ const square = new Square(10);
 console.log(square.area);
 // 输出 100
 ```
+`extends`继承的核心代码如下，其实现和上述的寄生组合式继承方式一样
+
+```javascript
+function _inherits(subType, superType) {
+  
+    // 创建对象，创建父类原型的一个副本
+    // 增强对象，弥补因重写原型而失去的默认的constructor 属性
+    // 指定对象，将新创建的对象赋值给子类的原型
+    subType.prototype = Object.create(superType && superType.prototype, {
+        constructor: {
+            value: subType,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    
+    if (superType) {
+        Object.setPrototypeOf 
+            ? Object.setPrototypeOf(subType, superType) 
+            : subType.__proto__ = superType;
+    }
+}
+```
+
+#### 总结
+
+1、函数声明和类声明的区别
+
+函数声明会提升，类声明不会。首先需要声明你的类，然后访问它，否则像下面的代码会抛出一个ReferenceError。
+
+```
+let p = new Rectangle(); 
+// ReferenceError
+
+class Rectangle {}
+复制代码
+```
+
+2、ES5继承和ES6继承的区别
+
+- ES5的继承实质上是先创建子类的实例对象，然后再将父类的方法添加到this上（Parent.call(this)）.
+- ES6的继承有所不同，实质上是先创建父类的实例对象this，然后再用子类的构造函数修改this。因为子类没有自己的this对象，所以必须先调用父类的super()方法，否则新建实例报错
+
+#### babel转译的class
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name || 'Kat'
+  }
+}
+```
+
+最后 [babel 编译出来](https://babeljs.io/repl/#?babili=false&browsers=&build=&builtIns=false&spec=false&loose=false&code_lz=Q&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=es2015%2Ces2017%2Creact%2Cstage-0%2Cstage-3&prettier=false&targets=&version=6.26.0&envVersion=)的代码如下。这里笔者用的是 Babel 6 的稳定版 6.26，不同版本编译出来可能有差异，但不至于有大的结构变动。
+
+```javascript
+'use strict'
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function')
+  }
+}
+
+var Animal = function Animal(name) {
+  _classCallCheck(this, Animal)
+
+  this.name = name || 'Kat'
+}
+```
+
+` _classCallCheck` 为检查是否为类调用 ，主要是检查this的指向，用new 调用this 是构造函数的实例
+
+
+
+给class加上方法
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name || 'Kat'
+  }
+
+  move() {}
+  getName() {
+    return this.name
+  }
+}
+```
+
+转译成
+
+```javascript
+'use strict'
+
+var _createClass = (function() {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i]
+      descriptor.enumerable = descriptor.enumerable || false
+      descriptor.configurable = true
+      if ('value' in descriptor) descriptor.writable = true
+      Object.defineProperty(target, descriptor.key, descriptor)
+    }
+  }
+  return function(Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps)
+    if (staticProps) defineProperties(Constructor, staticProps)
+    return Constructor
+  }
+})()
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function')
+  }
+}
+
+var Animal = (function() {
+  function Animal(name) {
+    _classCallCheck(this, Animal)
+
+    this.name = name || 'Kat'
+  }
+
+  _createClass(Animal, [
+    {
+      key: 'move',
+      value: function move() {},
+    },
+    {
+      key: 'getName',
+      value: function getName() {
+        return this.name
+      },
+    },
+  ])
+
+  return Animal
+})()
+
+```
+
+例子长了不少，但其实主要的变化只有两个：一是 `Animal` 被包了一层而不是直接返回；二是新增的方法 `move` 和 `getName` 是通过一个 `_createClass()` 方法来实现的。它将两个方法以 `key`/`value` 的形式作为数组传入，看起来，是要把它们设置到 `Animal` 的原型链上面，以便后续继承之用
+
+先来看看_createClass 是什么
+
+```javascript
+var _createClass = (function() {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i]
+      descriptor.enumerable = descriptor.enumerable || false
+      descriptor.configurable = true
+      if ('value' in descriptor) descriptor.writable = true
+      Object.defineProperty(target, descriptor.key, descriptor)
+    }
+  }
+
+  return function(Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps)
+    if (staticProps) defineProperties(Constructor, staticProps)
+    return Constructor
+  }
+})()
+```
+
+它就是把你定义的 `move`、`getName` 方法通过 `Object.defineProperty` 方法设置到 `Animal.prototype` 上去
+
+再看看继承底下的实现机制是怎么样的，以及它的 `constructor` 和 `__proto__` 属性将如何被正确设置。带着这两个问题，
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name || 'Kat'
+  }
+}
+
+class Tiger extends Animal {
+  constructor(name, type) {
+    super(name)
+    this.type = type || 'Paper'
+  }
+}
+```
+
+
+
+我们一起来看下编译后的源码：
+
+```javascript
+'use strict'
+
+function _possibleConstructorReturn(self, call) {
+  if (!self) {
+    throw new ReferenceError(
+      "this hasn't been initialised - super() hasn't been called"
+    )
+  }
+  return call && (typeof call === 'object' || typeof call === 'function')
+    ? call
+    : self
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== 'function' && superClass !== null) {
+    throw new TypeError(
+      'Super expression must either be null or a function, not ' +
+        typeof superClass
+    )
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    },
+  })
+  if (superClass)
+    Object.setPrototypeOf
+      ? Object.setPrototypeOf(subClass, superClass)
+      : (subClass.__proto__ = superClass)
+}
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function')
+  }
+}
+
+var Animal = function Animal(name) {
+  _classCallCheck(this, Animal)
+
+  this.name = name || 'Kat'
+}
+
+var Tiger = (function(_Animal) {
+  _inherits(Tiger, _Animal)
+
+  function Tiger(name, type) {
+    _classCallCheck(this, Tiger)
+
+    var _this = _possibleConstructorReturn(
+      this,
+      (Tiger.__proto__ || Object.getPrototypeOf(Tiger)).call(this, name)
+    )
+
+    _this.type = type || 'Paper'
+    return _this
+  }
+
+  return Tiger
+})(Animal)
+
+```
+
+
+
+相比无继承的代码，这里主要增加了几个函数。`_possibleConstructorReturn` 顾名思义，可能不是很重要，回头再读。精华在 `_inherits(Tiger, Animal)` 这个函数，我们按顺序来读一下。首先是一段异常处理，简单地检查了 `superClass` 要么是个函数，要么得是个 null。也就是说，如果你这样写那是不行的：
+
+```javascript
+const Something = 'not-a-function'
+class Animal extends Something {}
+// Error: Super expression must either be null or a function, not string
+```
+
+接下来这句代码将 `prototype` 和 `constructor` 一并设置到位，是精华。注意，这个地方留个问题：为什么要用 `Object.create(superClass.prototype)`，而不是直接这么写：
+
+```javascript
+function _inherits(subClass, superClass) {
+  subClass.prototype = superClass && superClass.prototype
+  subClass.prototype.constructor = { ... }
+}
+```
+
+很明显，是为了避免任何对 `subClass.prototype` 的修改影响到 `superClass.prototype`。使用 `Object.create(asPrototype)` 出来的对象，其实上是将 `subClass.prototype.__proto__ = superClass.prototype`，这样 `subClass` 也就继承了 `superClass`，可以达到这样两个目的：
+
+1. 当查找到 `subClass` 上没有的属性时，会自动往 `superClass` 上找；这样 `superClass.prototype` 原型上发生的修改都能实时反映到 `subClass` 上
+2. `subClass.prototype` 本身是个新的对象，可以存放 `subClass` 自己的属性，这样 `subClass.prototype` 上的任何修改不会影响到 `superClass.prototype`
+
+最后，如果 `superClass` 不为空，那么将 `subClass.__proto__` 设置为 `superClass`。这点我并不是很理解,猜测是为了子类去继承父类的静态属性和方法
+
+至此，一个简单的继承就完成了。在使用了 `extends` 关键字后，实际上背后发生的事情是：
+
+- 子「类」`prototype` 上的 `__proto__` 被正确设置，指向父「类」的 `prototype`: `subClass.prototype = { __proto__: superClass.prototype }`
+- 子「类」`prototype` 上的 `constructor` 被正确初始化，这样 `instanceof` 关系能得到正确结果
