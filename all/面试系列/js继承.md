@@ -360,6 +360,8 @@ class Rectangle {}
 - ES5的继承实质上是先创建子类的实例对象，然后再将父类的方法添加到this上（Parent.call(this)）.
 - ES6的继承有所不同，实质上是先创建父类的实例对象this，然后再用子类的构造函数修改this。因为子类没有自己的this对象，所以必须先调用父类的super()方法，否则新建实例报错
 
+#### 其他：
+
 #### babel转译的class
 
 ```javascript
@@ -604,3 +606,36 @@ function _inherits(subClass, superClass) {
 
 - 子「类」`prototype` 上的 `__proto__` 被正确设置，指向父「类」的 `prototype`: `subClass.prototype = { __proto__: superClass.prototype }`
 - 子「类」`prototype` 上的 `constructor` 被正确初始化，这样 `instanceof` 关系能得到正确结果
+
+#### 手写new
+
+```javascript
+function People(name) {
+      this.name = name;
+    }
+People.prototype.sayName = function () {
+      console.log(this.name);
+    }
+    
+function myNew(func, ...args) {
+    if (typeof func !== 'function') {
+        throw '第一个参数必须是方法体'
+    }
+    const obj = {}
+    obj.__proto__ = func.prototype;
+    const res = func.apply(obj, args)
+    if (typeof res === 'function' || (typeof res === 'object' && res !== null)) {
+        return res
+    } else {
+        return obj
+     }
+}
+
+    let me = myNew(People, 'yjl')
+
+    me.sayName()  // yjl
+    console.log(me.constructor === People) //true
+    console.log(me.__proto__ === People.prototype)  //true
+    console.log(me instanceof People) //true
+```
+
