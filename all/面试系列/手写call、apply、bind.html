@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    Function.prototype.myCall = function (context = globalThis) {
+      // 设置 fn 为调用 myCall 的方法 这一步的作用是让fn执行的时候this指向context，利用的是 谁调用，this指向谁的原则
+      context.fn = this;
+
+      // 获取剩余参数
+      const otherArg = Array.from(arguments).slice(1);
+
+      // 调用这个方法，将剩余参数传递进去
+      // context.fn(otherArg);
+
+      // 将这个方法的执行结果传给 result
+      let result = context.fn(...otherArg);;
+
+      // 删除这个变量
+      delete context.fn;
+
+      // 返回 result 结果
+      return result;
+    };
+
+
+
+
+    Function.prototype.myApply = function (context = globalThis, arr) {
+      // 设置 fn 为调用 myCall 的方法 这一步的作用是让fn执行的时候this指向context，利用的是 谁调用，this指向谁的原则
+      context.fn = this;
+
+
+      // 将这个方法的执行结果传给 result
+      let result = context.fn(...otherArg);;
+
+      // 删除这个变量
+      delete context.fn;
+
+      // 返回 result 结果
+      return result;
+    };
+
+
+    Function.prototype.myBind = function (context = globalThis, ...rest1) {
+      //简单实现，不考虑new调用和原型链的情况
+      // context.fn = this;
+      // return (...rest2)=>context.fn(...rest1,...rest2);
+
+      // 设置 fn 为调用 myCall 的方法
+      const fn = this;
+
+      // 获取该方法剩余参数
+      const otherArg = [...arguments].slice(1);
+
+      // 设置返回的一个新方法
+      const result = function () {
+
+        // 获取返回方法体的参数
+        const resultArg = [...arguments];
+
+        // 如果是通过 new 调用的，绑定 this 为实例对象
+        if (this instanceof result) {
+          fn.apply(this, otherArg.concat(resultArg));
+        } else { // 否则普通函数形式绑定 context
+          fn.apply(context, otherArg.concat(resultArg));
+        }
+      }
+
+      // 绑定原型链
+      result.prototype = Object.create(fn.prototype);
+
+      // 返回结果
+      return result;
+    };
+
+    this.a = 1;
+
+    const fn = function () {
+      this.a = 2;
+      console.log(this.a);
+    }
+
+    let fn1 = fn.bind(fn);
+    fn1()
+    console.log(fn.a)
+  </script>
+</body>
+
+</html>
