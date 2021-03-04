@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    var LRUCache = function (capacity) {
+      this.keys = []
+      this.cache = Object.create(null)
+      this.capacity = capacity
+    };
+
+    LRUCache.prototype.get = function (key) {
+      if (this.cache[key]) {
+        // 调整位置
+
+        remove(this.keys, key)  // 先删
+        this.keys.push(key)  // 再加入
+        return this.cache[key]
+      }
+      return -1
+    };
+
+    LRUCache.prototype.put = function (key, value) {
+      if (this.cache[key]) {
+        // 存在即更新
+
+        this.cache[key] = value
+        remove(this.keys, key)
+        this.keys.push(key)
+
+      } else {
+        // 不存在即加入
+        this.cache[key] = value
+        this.keys.push(key)
+        if (this.keys.length > this.capacity) {
+          this.removeCache(this.cache, this.keys, this.keys[0])
+        }
+      }
+    };
+
+    // 移除 key
+    function remove(arr, key) {
+      if (arr.length) {
+        const index = arr.indexOf(key)
+        if (index > -1) {
+          return arr.splice(index, 1)
+        }
+      }
+    }
+
+    // 移除缓存中 key
+    function removeCache(cache, keys, key) {
+      cache[key] = null
+      remove(keys, key)
+    }
+
+  </script>
+</body>
+
+</html>
