@@ -62,6 +62,42 @@
     }
 
   </script>
+
+  <script>
+    // 用 map来实现 
+    function LRUCache(size) {
+      this.size = size
+      this.cache = new Map()
+    }
+    LRUCache.prototype.get = function (key) {
+      if (this.cache.has(key)) {
+        let val = this.cache.get(key)
+        this.cache.delete(key)
+        this.cache.set(key, val)
+        return this.cache.get(key)
+      } else {
+        return -1
+      }
+    }
+    LRUCache.prototype.put = function (key, value) {
+      if (this.cache.has(key)) {
+        this.cache.delete(key)
+      } else if (this.cache.size == this.size) {
+        // console.log(this.cache.keys().next(), 'key')
+        // map可以记录set的顺序 this.cache.keys()生成的迭代对象的顺序就是set的顺序
+        this.cache.delete(this.cache.keys().next().value)
+      }
+      this.cache.set(key, value)
+    }
+    let o = new LRUCache(2)
+    // debugger
+    o.put(1, 1)
+    o.put(2, 2)
+    o.get(1)
+    o.put(3, 3)
+    o.put(4, 4)
+    console.log(o)
+  </script>
 </body>
 
 </html>
