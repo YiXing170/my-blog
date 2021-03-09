@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function myNew(fn, ...args) {
+      if (typeof fn !== "function") {
+        throw new Error("参数应为函数")
+      }
+      let res = {}
+      let result = fn.apply(res, args)
+      if (result) return result
+      Object.setPrototypeOf(res, fn.prototype)
+      return res
+
+    }
+    let fn = function (age, name) {
+      this.age = age
+      this.name = name
+    }
+    // console.dir(fn)
+    let res = myNew(fn, 18, 'yjl')
+    console.log(res)
+
+
+    console.log(Object instanceof Object)
+    function _instanceof(left, right) {
+      let lp = left.__proto__
+      let rp = right.prototype
+      while (true) {
+        if (lp === null || !lp) {
+          return false
+        }
+        if (lp === rp) return true
+        lp = lp.__proto__
+      }
+    }
+    console.log(_instanceof(Object, Object))
+
+  </script>
+</body>
+
+</html>
