@@ -10,29 +10,45 @@
 
 <body>
   <script>
-    function curry(fn, args) {
-      var len = fn.length
-      args = args || []
-      return function () {
-        var _args = args.slice(0)
-        _args.push(...arguments)
-        if (_args.length < len) {
-          return curry.call(this, fn, _args)
-        } else {
-          return fn.apply(this, _args)
-        }
-      }
+    // 这种实现方式是看原函数的参数个数， 这道题有个升级版就是无限层级的add(1)(2)(3)...(n)，实现方法
 
+    // function curry(fn, args) {
+    //   var len = fn.length
+    //   args = args || []
+    //   return function () {
+    //     var _args = args.slice(0)
+    //     _args.push(...arguments)
+    //     if (_args.length < len) {
+    //       return curry.call(this, fn, _args)
+    //     } else {
+    //       return fn.apply(this, _args)
+    //     }
+    //   }
+
+    // }
+    // var fn = curry(function (a, b, c) {
+    //   console.log([a, b, c]);
+    // });
+    // console.log(fn("a", "b", "c"));
+    // console.log(fn("a", "b")("c"));
+    // ["a", "b", "c"]
+    // ["a", "b", "c"]
+
+    const curry = (fn, ...args) =>
+      args.length >= fn.length ?
+        fn(...args)
+        : (..._args) => curry(fn, ...args, ..._args)
+    function add1(x, y, z) {
+      return x + y + z;
     }
+    const add = curry(add1);
+    console.log(add(1, 2, 3));
+    console.log(add(1)(2)(3));
+    console.log(add(1, 2)(3));
+    console.log(add(1)(2, 3));
 
 
-    var fn = curry(function (a, b, c) {
-      console.log([a, b, c]);
-    });
-    console.log(fn("a", "b", "c"));
-    console.log(fn("a", "b")("c"));
-    // ["a", "b", "c"]
-    // ["a", "b", "c"]
+
   </script>
 </body>
 
