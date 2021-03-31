@@ -11,22 +11,29 @@
 <body>
   <script>
     Function.prototype.myCall = function (context = globalThis) {
-      // 设置 fn 为调用 myCall 的方法 这一步的作用是让fn执行的时候this指向context，利用的是 谁调用，this指向谁的原则
+      // // 设置 fn 为调用 myCall 的方法 这一步的作用是让fn执行的时候this指向context，利用的是 谁调用，this指向谁的原则
+      // context.fn = this;
+
+      // // 获取剩余参数
+      // const otherArg = Array.from(arguments).slice(1);
+
+      // // 调用这个方法，将剩余参数传递进去
+      // // context.fn(otherArg);
+
+      // // 将这个方法的执行结果传给 result
+      // let result = context.fn(...otherArg);;
+
+      // // 删除这个变量
+      // delete context.fn;
+
+      // // 返回 result 结果
+      // return result;
+
+      // 复习3-31
       context.fn = this;
-
-      // 获取剩余参数
-      const otherArg = Array.from(arguments).slice(1);
-
-      // 调用这个方法，将剩余参数传递进去
-      // context.fn(otherArg);
-
-      // 将这个方法的执行结果传给 result
-      let result = context.fn(...otherArg);;
-
-      // 删除这个变量
-      delete context.fn;
-
-      // 返回 result 结果
+      let args = Array.from(arguments).slice(1);
+      let result = context.fn(...args);
+      delete context.fn
       return result;
     };
 
@@ -34,17 +41,12 @@
 
 
     Function.prototype.myApply = function (context = globalThis, arr) {
-      // 设置 fn 为调用 myCall 的方法 这一步的作用是让fn执行的时候this指向context，利用的是 谁调用，this指向谁的原则
-      context.fn = this;
 
 
-      // 将这个方法的执行结果传给 result
-      let result = context.fn(...otherArg);;
-
-      // 删除这个变量
-      delete context.fn;
-
-      // 返回 result 结果
+      // 复习
+      context.fn = this
+      let result = context.fn(...arr);
+      delete context.fn
       return result;
     };
 
@@ -54,31 +56,47 @@
       // context.fn = this;
       // return (...rest2)=>context.fn(...rest1,...rest2);
 
-      // 设置 fn 为调用 myCall 的方法
-      const fn = this;
+      // // 设置 fn 为调用 myCall 的方法
+      // const fn = this;
 
-      // 获取该方法剩余参数
-      const otherArg = [...arguments].slice(1);
+      // // 获取该方法剩余参数
+      // const otherArg = [...arguments].slice(1);
 
-      // 设置返回的一个新方法
-      const result = function () {
+      // // 设置返回的一个新方法
+      // const result = function () {
 
-        // 获取返回方法体的参数
-        const resultArg = [...arguments];
+      //   // 获取返回方法体的参数
+      //   const resultArg = [...arguments];
+      //   // Array.prototype.slice.call(arguments)
 
-        // 如果是通过 new 调用的，绑定 this 为实例对象
+      //   // 如果是通过 new 调用的，绑定 this 为实例对象
+      //   if (this instanceof result) {
+      //     fn.apply(this, otherArg.concat(resultArg));
+      //   } else { // 否则普通函数形式绑定 context
+      //     fn.apply(context, otherArg.concat(resultArg));
+      //   }
+      // }
+
+      // // 绑定原型链
+      // result.prototype = Object.create(fn.prototype);
+
+      // // 返回结果
+      // return result;
+
+
+      // 复习
+      const fn = this
+
+      let result = function () {
+        let rest2 = Array.from(arguments)
         if (this instanceof result) {
-          fn.apply(this, otherArg.concat(resultArg));
-        } else { // 否则普通函数形式绑定 context
-          fn.apply(context, otherArg.concat(resultArg));
+          fn.apply(this, rest1.concat(rest2))
+        } else {
+          fn.apply(context, rest1.concat(rest2))
         }
       }
-
-      // 绑定原型链
-      result.prototype = Object.create(fn.prototype);
-
-      // 返回结果
-      return result;
+      result.prototype = Object.create(fn.prototype)
+      return result
     };
 
     this.a = 1;
