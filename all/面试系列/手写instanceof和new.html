@@ -14,9 +14,12 @@
       if (typeof fn !== "function") {
         throw new Error("参数应为函数")
       }
+      if (!fn.prototype) {
+        throw new Error("函数不能为箭头函数")
+      }
       let res = {}
       let result = fn.apply(res, args)
-      if (result) return result
+      if (typeof result === 'object' || typeof result === 'function') return result
       Object.setPrototypeOf(res, fn.prototype)
       return res
 
@@ -32,15 +35,11 @@
 
     console.log(Object instanceof Object)
     function _instanceof(left, right) {
-      let lp = left.__proto__
-      let rp = right.prototype
-      while (true) {
-        if (lp === null || !lp) {
-          return false
-        }
-        if (lp === rp) return true
-        lp = lp.__proto__
+      if (!left || !right) return
+      while (left = left.__proto__) {
+        if (left === right.prototype) return true
       }
+      return false
     }
     console.log(_instanceof(Object, Object))
 
