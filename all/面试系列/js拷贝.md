@@ -39,28 +39,50 @@ const checkType = (target) => {
    return Object.prototype.toString.call(target).slice(8, -1)
 }
 function deepClone(target) {
+      // let result
+      // if (checkType(target) === 'Object') {
+      //   result = {}
+      // } else if (checkType(target) === 'Array') {
+      //   result = []
+      // } else {
+      //   return target
+      // }
+      // for (let key in target) {
+      //   if (target.hasOwnProperty(key)) {
+      //     if (checkType(target[key]) === 'Object' || checkType(target[key]) === 'Array') {
+      //       result[key] = deepClone(target[key])
+      //     } else {
+      //       result[key] = target[key]
+      //     }
+      //   }
+      // }
+      // return result
+
+      // 复习
+
       let result
-      if (checkType(target) === 'Object') {
-        result = {}
-      } else if (checkType(target) === 'Array') {
-        result = []
-      } else {
-        return target
+      if(Object.prototype.toString.call(target)==='[object Object]'){
+        result={}
+      }else if(Object.prototype.toString.call(target)==='[object Array]'){
+        result={}
+      }else{
+         return target
       }
-      for (let key in target) {
-        if (target.hasOwnProperty(key)) {
-          if (checkType(target[key]) === 'Object' || checkType(target[key]) === 'Array') {
-            result[key] = deepClone(target[key])
-          } else {
-            result[key] = target[key]
+
+      for(let key in target){
+        if(target.hasOwnProperty(key)){
+          if(typeof target[key]==='object'){
+            result[key]=deepClone(target[key])
+          }else{
+            result[key]=target[key]
           }
         }
       }
-      return result
+      return target
 }
 ```
 
-这个版本还有缺陷，如未考虑循环依赖 ，其他对象，函数的拷贝等等，过程可参考https://juejin.cn/post/6844903929705136141#heading-0
+这个版本还有缺陷，如未考虑循环依赖 ，其他对象（像Date RegExp ），函数的拷贝等等，过程可参考https://juejin.cn/post/6844903929705136141#heading-0
 
 业务开发中常用的是JSON.parse(JSON.stringify(obj))
 
