@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // 1 constructor函数
+    // class People {
+    //   constructor(name, age) {
+    //     this.name = name
+    //     this.age = age
+    //   }
+    //   say() {
+    //     return `my name is ${this.name}`
+    //   }
+    // }
+
+    // 2 class必须用new调用
+    // People('yjl',18) // error
+
+
+    // 3 实例属性   定义在this上
+
+    // 4  静态方法  中的this也是指的实例
+    //其他class特性：
+
+    // 不存在变量提升
+    // 不能覆盖声明
+
+
+
+
+    // 下面用es5实现class
+    //     class Person {
+    //     constructor(name, age) {
+    //         this.name = name;
+    //         this.age = age;
+    //     }
+    //     toString() {
+    //         return '(' + this.name + ',' + this.age + ')';
+    //     }
+    // }
+    // var p = new Person('Mia', 18);
+
+
+
+
+    function _instanceof(left, right) {
+      if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) {
+        return right[Symbol.hasInstance](left);
+      } else {
+        return left instanceof right;
+      }
+    }
+    function _classCallCheck(instance, Constructor) {
+      if (!_instanceof(instance, Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+      }
+    }
+
+    function _defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+    function _createClass(Constructor, protoProps, staticProps) {
+      if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) _defineProperties(Constructor, staticProps);
+      return Constructor;
+    }
+
+
+    var Person =
+      /*#__PURE__*/
+      function () {
+        function Person(name, age) {
+          _classCallCheck(this, Person);
+
+          this.name = name;
+          this.age = age;
+        }
+
+        _createClass(Person, [{
+          key: "toString",
+          value: function toString() {
+            return '(' + this.name + ',' + this.age + ')';
+          }
+        }]);
+
+        return Person;
+      }();
+
+    var p = new Person('Mia', 18);
+
+
+
+  </script>
+</body>
+
+</html>
