@@ -10,39 +10,114 @@
 
 <body>
   <script>
-    function myNew(fn, ...args) {
-      if (typeof fn !== "function") {
-        throw new Error("参数应为函数")
+    // function myNew(fn, ...args) {
+    //   if (typeof fn !== "function") {
+    //     throw new Error("参数应为函数")
+    //   }
+    //   if (!fn.prototype) {
+    //     throw new Error("函数不能为箭头函数")
+    //   }
+    //   let res = {}
+    //   let result = fn.apply(res, args)
+    //   if (typeof result === 'object' || typeof result === 'function') return result
+    //   Object.setPrototypeOf(res, fn.prototype)
+    //   return res
+
+    // }
+    // let fn = function (age, name) {
+    //   this.age = age
+    //   this.name = name
+    // }
+    // // console.dir(fn)
+    // let res = myNew(fn, 18, 'yjl')
+    // console.log(res)
+
+
+    // console.log(Object instanceof Object)
+    // function _instanceof(left, right) {
+    //   if (!left || !right) return
+    //   while (left = left.__proto__) {
+    //     if (left === right.prototype) return true
+    //   }
+    //   return false
+    // }
+    // console.log(_instanceof(Object, Object))
+
+
+    // 复习
+    // function myNew(fn, ...args) {
+    //   if (typeof fn !== 'function') return console.error('must be function')
+    //   if (!fn.prototype) return console.error('can not be arrow function')
+    //   let obj = {}
+    //   let res = fn.apply(obj, args)
+    //   if (typeof res === 'function' || typeof res === 'object') {
+    //     return res
+    //   } else {
+    //     obj.__proto__ = fn.prototype  //Object.setPrototypeOf(obj, fn.prototype)
+    //     return obj
+    //   }
+    // }
+    // let fn = function (age, name) {
+    //   this.age = age
+    //   this.name = name
+    // }
+    // // console.dir(fn)
+    // let res = myNew(fn, 18, 'yjl')
+    // console.log(res)
+
+    // function _instanceof(left, right) {
+    //   if (!left || !right) return
+    //   while (left = left.__proto__) {
+    //     if (left === right.prototype) {
+    //       return true
+    //     }
+    //   }
+    //   return false
+    // }
+
+
+
+    // call 
+    // function myCall(fn, obj = globalThis, ...args) {
+    //   let s = Symbol()
+    //   obj[s] = fn
+    //   let res = obj[s](...args)
+    //   delete obj[s]
+    //   return res
+    // }
+
+    let fn = function (b, c) {
+      return this.a + b + c
+    }
+    // console.log(myCall(fn, { a: 1 }, 1));
+
+
+
+    // apply 
+
+    // function myApply(fn, obj = globalThis, args) {
+    //   let s = Symbol()
+    //   obj[s] = fn
+    //   let res = obj[s](...args)
+    //   delete obj[s]
+    //   return res
+    // }
+    // console.log(myApply(fn, { a: 1 }, [1]));
+
+
+
+    //  bind
+
+    function myBind(fn, obj = globalThis, ...args) {
+      let res = function () {
+        let args1 = Array.from(arguments)
+        return fn.apply(obj, args1.concat(args))
       }
-      if (!fn.prototype) {
-        throw new Error("函数不能为箭头函数")
-      }
-      let res = {}
-      let result = fn.apply(res, args)
-      if (typeof result === 'object' || typeof result === 'function') return result
-      Object.setPrototypeOf(res, fn.prototype)
       return res
-
+      // obj.fn = fn
+      // return (...rest2) => obj.fn(...args, ...rest2);  //简化写法
     }
-    let fn = function (age, name) {
-      this.age = age
-      this.name = name
-    }
-    // console.dir(fn)
-    let res = myNew(fn, 18, 'yjl')
-    console.log(res)
-
-
-    console.log(Object instanceof Object)
-    function _instanceof(left, right) {
-      if (!left || !right) return
-      while (left = left.__proto__) {
-        if (left === right.prototype) return true
-      }
-      return false
-    }
-    console.log(_instanceof(Object, Object))
-
+    console.log(myBind(fn, { a: 1 }, 1)(1));
   </script>
 </body>
 
