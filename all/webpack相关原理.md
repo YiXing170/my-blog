@@ -130,7 +130,7 @@ var installedModules = {};  //缓存对象
 
 下面是几个值得注意的点
 
-+ __webpack_require__.d 方法是为了实现ESM的规范：导出不是值的复制，而是共享的引用。使用时exports.name，会触发getter返回name的当前值
++ __webpack_require__.d 方法是为了实现ESM的规范：导出不是值的复制，而是共享的引用。使用时exports.name，会触发getter返回name的当前值，即始终指向name所在的地址
 
 + import一个commonjs模块会是什么情况呢，反过来又会如何呢？
 
@@ -228,7 +228,7 @@ __webpack_require__.e = function requireEnsure(chunkId) {
 代码大致逻辑如下：
 
 1. 缓存查找：从缓存`installedChunks`中查找是否有缓存模块，如果缓存标识为0，则表示模块已加载过，直接返回`promise`；如果缓存为数组，表示缓存正在加载中，则返回缓存的`promise`对象
-2. 如果没有缓存，则创建一个`promise`，并将`promise`和`resolve`、`reject`缓存在`installedChunks`中
+2. 如果没有缓存，则创建一个`promise`，并将`promise`（索引2）和`resolve`（索引0）、`reject`（索引1）缓存为一个数组，数组存储在`installedChunks` 对象中
 3. 构建一个script标签，append到head标签中，src指向加载的模块脚本资源，实现动态加载js脚本
 4. 添加script标签onload、onerror 事件，如果超时或者模块加载失败，则会调用reject返回模块加载失败异常
 5. 最后返回当前模块`promise`，对应于`import()`
@@ -356,7 +356,6 @@ module.exports = loader;
       use: path.join(__dirname, '/myLoader.js')
     }]
  },   
-
 ```
 
 ##### 编写plugin

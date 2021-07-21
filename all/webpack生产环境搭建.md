@@ -59,7 +59,7 @@ new MiniCssExtractPlugin({    // 作用：提取css成文件，后面会介绍
 
 ##### css额外处理
 
-前面说到把css提取成单独的css文件，同时也注意到dist目录下的js/css/img都是在同一目录，不太方便管理，
+前面说到把css提取成单独的css文件，同时也注意到dist目录下的js/css/img文件都是在同一目录，不太方便管理，
 
 需要处理一下
 
@@ -147,7 +147,7 @@ module: {
 
    ```javascript
 
-   // config 为导出的整个配置对象
+   // config 为导出的整个webpack配置对象
    // config.optimization.minimizer 可以用来覆盖压缩时的一些默认行为，像对注释的处理，修改压缩配置等（自定义）
    // 像生产时去除console，也是在这里配置的
    optimization: {
