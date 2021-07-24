@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    //一、创建Ajax实例
+    let xhr = new XMLHttpRequest();//IE下为ActiveObject对象
+    //二、打开请求: 发送请求之前的一些配置项
+    //1.HTTP METHOD:GET/POST/PUT/DELETE/HEAD/OPTIONS/TRACE/CONNECT/
+    //2.url:接口地址
+    //3.async：设置Ajax的同步异步，默认是异步
+    //4.user-name/user-pass用户名和密码，一般不用
+    // xhr.open('get','/index?id=1')
+    xhr.open(method, url, async, [user - name], [user - pass])
+    //三、事件监听：一般监听的都是readystatechange事件(Ajax状态改变事件)，基于这个事件可以获取服务器返回的响应头响应主体
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        console.log(xhr.responseText);
+      }
+    };
+    //   xhr.onreadystatechange=()=>{
+    //     if(xhr.readyState===4&&xhr.status===200){
+    //       console.log(xhr.responseText)
+    //     }
+    //  }
+    //四、发送Ajax请求：从这步开始，当前Ajax任务开始，如果Ajax是同步的，后续代码不会执行，要等到Ajax状态成功后再执行
+    // xhr.send(data)
+    xhr.send([请求主体内容])   // 请求主体内容一般是 post要传递的参数  data
+
+  </script>
+  <script>
+    function (window) {
+      //设置默认的参数配置项  
+      let _default = {
+        method: 'GET',
+        url: '',
+        baseURL: '',
+        headers: {},
+        dataType: 'JSON',
+        data: null, //POST系列
+        params: null, //GET系列
+        cache: true
+      };
+      //基于Promise设计模式管理Ajax
+      let ajaxPromise = function axios() {
+        let {
+          url,
+          baseURL,
+          data,
+          dataType,
+          headers,
+          cache,
+          params
+        } = options;
+        //=>把传递的参数进一步进行处理
+        if (/^(GET|DELETE|HEAD|OPTIONS)$/.test(method)) {
+          //GET参数
+          if (params) {
+            url += `${ajaxPromise.check(url)}${ajaxPromise.formatData(params)}`
+          }
+          if (cache === false) {
+            url += `${ajaxPromise.check(url)}_=${+(new Date())}`
+          }
+          data = null;//GET系列请求主体为空
+        } else {
+          //POST系列
+          if (data) {
+            data = ajaxPromise.formatData(data);
+          }
+        }
+        //=>基于Promise发送Ajax
+        return new Promise((resolve, reject) => {
+          let xhr = new XMLHttpRequest();
+          xhr.open(method, `${baseURL}${url}`);
+          if (headers != null && typeof headers === 'object') {
+            for (let attr in headers) {
+              if (headers.hasOwnProperty(attr)) {
+                let val = headers[attr];
+                if (/[\u4e00-\u9fa5]/.test(val)) {
+                  val = encodeURIComponent(val);
+                }
+                xhr.setRequestHeader(attr, headers[attr]);
+              }
+            }
+          }
+          //=>如果headers存在，我们需要设置请求头
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4) {
+              if (/^(2|3)\d{2}$/.test(xhr.status)) {
+                let result = xhr.responseText;
+                dataType = dataType.toUpperCase();
+                dataType === 'JSON' ? result = JSON.parse(result) : (dataType === 'XML' ? result = xhr.responseXML : null);
+                resolve(result, xhr);
+                return;
+              }
+              reject(xhr.statusText, xhr);
+            }
+          }
+          xhr.send(data);
+        })
+      }
+
+      ajaxPromise.defaults = _default;
+
+      ajaxPromise.formatData = function formatData() {
+        let str = ``;
+        for (let attr in obj) {
+          if (obj.hasOwnProperty(attr)) {
+            str += `${attr}=${obj[attr]}&`;
+          }
+          return str.substring(0, str.length - 1)
+        }
+      }
+
+      ajaxPromise.check = function check(url) {
+        return url.indexOf('?') > -1 ? '&' : '?';
+      }
+
+      //GET系列 
+      ['get', 'delete', 'head', 'options'].forEach(item => {
+        ajaxPromise[item] = (url, options = {}) => {
+          options = {
+            ..._default,
+            ...options,
+            url,
+            method: item.toUpperCase()
+          };
+          return ajaxPromise(options);
+        }
+      })
+      //POST系列
+      ['post', 'put', 'patch'].forEach(item => {
+        ajaxPromise[item] = (url, data = {}, options = {}) => {
+          options = {
+            ..._default,
+            ...options,
+            url,
+            method: item.toUpperCase(),
+            data
+          };
+          return ajaxPromise(options);
+        }
+      })
+
+      window.ajaxPromise = ajaxPromise;
+    } (window)
+
+  </script>
+</body>
+
+</html>
