@@ -1,4 +1,4 @@
-**nextTick简单实现**
+#### **nextTick简单实现**
 
 ```javascript
 let callbacks = [];
@@ -58,6 +58,12 @@ function nextTick(cb,ctx) { //ctx是vue实例
    }
 }
 ```
+
+Vue 异步更新的大概流程：依赖收集结束之后，当响应式数据发生变化 -> 触发 setter 执行 dep.notify -> 让 dep 通知 自己收集的所有 watcher 执行 update 方法 -> watch.update 调用 queueWatcher 将自己放到 watcher 队列 -> 接下来调用 nextTick 方法将刷新 watcher 队列的方法（flushSchedulerQuene）放到 callbacks 数组 -> 然后将刷新 callbacks 数组的方法（flushCallbacks）放到浏览器的异步任务队列 -> 待将来执行时最终触发 watcher.run 方法，执行 watcher.get 方法。
+
+
+
+#### 事件队列
 
 所有任务可以分成两种，一种是同步任务（synchronous），另一种是异步任务（asynchronous）。
 

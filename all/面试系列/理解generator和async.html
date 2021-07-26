@@ -12,18 +12,18 @@
   <script>
 
 
-    // let tick = (duration) => {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       console.log(new Date(), duration)
-    //       resolve(duration)
-    //     }, duration)
-    //   })
-    // }
+    let tick = (duration) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          console.log(new Date(), duration)
+          resolve(duration)
+        }, duration)
+      })
+    }
 
     function* generator() {
-      let result = yield tick(1000)  // 关键点是generator()执行时，函数式不执行的，.next()后 遇到yield暂停执行，但会把yield后的表达式的值生成 {value:tick(1000) ,done:false}
-      console.log(result, '1')        // 下一次的next（res） 通用传进来的res 才会赋值给 result，即next（）的第一次传递值是无效的
+      let result = yield tick(1000)  // 关键点是generator()执行时，函数是不执行的，.next()后 遇到yield暂停执行，但会把yield后的表达式的值生成 {value:tick(1000) ,done:false}
+      console.log(result, '1')        // 下一次的next(res)   通用传进来的res 才会赋值给 result，即next（）的第一次传递值是无效的
       result = yield tick(2000)
       console.log(result, '2')
       result = yield tick(3000)
@@ -53,16 +53,16 @@
     // }
 
 
-    async function asyncFunc() {
-      var result = await tick(1000);
-      console.log(result);
-      result = await tick(2000);
-      console.log(result);
-      result = await tick(3000);
-      console.log(result);
-    }
+    // async function asyncFunc() {
+    //   var result = await tick(1000);
+    //   console.log(result);
+    //   result = await tick(2000);
+    //   console.log(result);
+    //   result = await tick(3000);
+    //   console.log(result);
+    // }
 
-    asyncFunc();
+    // asyncFunc();
 
 
 

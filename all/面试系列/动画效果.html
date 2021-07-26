@@ -1,0 +1,162 @@
+<!-- <!DOCTYPE html>
+  
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>动画一</title>
+  <style>
+    .spinner {
+      margin: 100px auto;
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .spinner>div {
+      display: inline-block;
+      background-color: rgb(43, 128, 226);
+      height: 100%;
+      width: 5px;
+      margin-right: 1px;
+      animation: bytedance 1s infinite;
+      /* animation-direction: alternate */
+    }
+
+    .spinner>div:nth-child(2) {
+      background-color: rgb(49, 84, 124);
+      animation-delay: -0.9s;
+    }
+
+    .spinner>div:nth-child(3) {
+      background-color: rgb(88, 128, 173);
+      animation-delay: -0.8s;
+    }
+
+    .spinner>div:nth-child(4) {
+      background-color: rgb(88, 128, 173);
+      animation-delay: -0.7s;
+    }
+
+    .spinner>div:nth-child(5) {
+      background-color: rgb(142, 187, 240);
+      animation-delay: -0.6s;
+    }
+
+    @keyframes bytedance {
+
+      0%,
+      40%,
+      100% {
+        transform: scaleY(0.5);
+      }
+
+      20% {
+        transform: scaleY(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="spinner">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</body>
+
+</html> -->
+
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>动画2</title>
+  <style>
+    .spinner {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      margin: 100px auto;
+    }
+
+    .spinner>div {
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+      border-radius: 50%;
+      background-color: lightblue;
+      position: absolute;
+      top: 0;
+      left: 0;
+      animation: loading 1.4s infinite ease-in;
+    }
+
+    .spinner>div:nth-child(2) {
+      animation-delay: -0.7s;
+    }
+
+    @keyframes loading {
+
+      0%,
+      100% {
+        transform: scale(0.0);
+      }
+
+      50% {
+        transform: scale(1.0);
+      }
+
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="spinner">
+    <div></div>
+    <div></div>
+  </div>
+</body>
+
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <!-- 
+
+    关于 nth-child: 选中的元素的 同级别的第几个   nth-of-type ：选中的的元素的  同级别同类型 的第几个
+
+   -->
+  <style>
+    /* 被变为红色的是第几个p?
+      
+        换成 nth-of-type呢？
+      */
+    div p:nth-child(2) {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <a href="#">链接也算位置</a>
+    <p>1</p>
+    <p>2</p>
+    <p>3</p>
+  </div>
+</body>
+
+</html>
