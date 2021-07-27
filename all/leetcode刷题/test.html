@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    /**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+    /**
+     * @param {ListNode} head
+     * @param {number} m
+     * @param {number} n
+     * @return {ListNode}
+     */
+    // var reverseBetween = function (head, m, n) {
+    //   let fir = new ListNode()
+    //   fir.next = head
+    //   let pre, cur, start, finish
+    //   let p = fir
+    //   for (let i = 0; i < m - 1; i++) {
+    //     p = p.next
+
+    //   }
+    //   start = p.next
+    //   finish = p
+    //   pre = start
+    //   cur = pre.next
+    //   for (let i = m; i < n; i++) {
+    //     let temp = cur.next
+    //     cur.next = pre
+    //     pre = cur
+    //     cur = temp
+    //   }
+
+
+    //   start.next = cur
+    //   finish.next = pre
+    //   return fir.next
+    // };
+
+    // const root = {
+    //   val: "A",
+    //   left: {
+    //     val: "B",
+    //     left: {
+    //       val: "D"
+    //     },
+    //     right: {
+    //       val: "E"
+    //     }
+    //   },
+    //   right: {
+    //     val: "C",
+    //     right: {
+    //       val: "F"
+    //     }
+    //   }
+    // };
+    // var levelOrder = function (root) {
+    //   let queen = []
+    //   let res = []
+    //   queen.push([root])
+    //   res.push([root.val])
+    //   while (queen.length) {
+    //     const top = queen[0]
+    //     for (let i = 0; i < top.length; i++) {
+    //       if (top[i].left) {
+    //         if (queen.length === 1) queen.push([])
+    //         queen[queen.length - 1].push(top[i].left)
+    //       }
+    //       if (top[i].right) {
+    //         if (queen.length === 1) queen.push([])
+    //         queen[queen.length - 1].push(top[i].right)
+    //       }
+    //     }
+
+    //     if (queen.length > 1) res.push(queen[queen.length - 1].map(item => item.val))
+    //     queen.shift()
+    //   }
+    //   return res
+    // };
+    // console.log(levelOrder(root))
+
+
+
+    // var combine = function (n, k) {
+    //   let res = []
+    //   let cur = []
+    //   debugger
+    //   function dfs(nth) {
+    //     if (k == cur.length) {
+    //       return res.push(cur.slice())
+    //     }
+    //     for (let i = nth; i < n + 1; i++) {
+    //       cur.push(i)
+    //       dfs(i + 1)
+    //       cur.pop()
+    //     }
+    //   }
+    //   dfs(1)
+    //   return res
+    // };
+    // combine(4, 2)
+    // var d = function (i) {
+    //   debugger
+    //   if (i == 100) return 100
+    //   return d(i + 1) + i
+    // }
+    // d(1)
+
+    // 1+2+d3
+
+
+    function mergeSort(arr) {
+      const len = arr.length
+      if (len <= 1) return arr
+      const mid = Math.floor(len / 2)
+      const leftArr = mergeSort(arr.slice(0, mid))
+      const rightArr = mergeSort(arr.slice(mid))
+      return mergeArr(leftArr, rightArr)
+    }
+    function mergeArr(arr1, arr2) {
+      // debugger
+      let j = 0, k = 0
+      const res = []
+      const len1 = arr1.length
+      const len2 = arr2.length
+      while (j < len1 && k < len2) {
+        if (arr1[j] <= arr2[k]) {
+          res.push(arr1[j])
+          j++
+        } else {
+          res.push(arr2[k])
+          k++
+        }
+      }
+      if (j < len1) {
+        return res.concat(arr1.slice(j))
+      } else {
+        return res.concat(arr2.slice(k))
+      }
+    }
+
+
+
+
+    function quickSort(arr) {
+      if (arr.length <= 1) return arr
+      let mid = Math.floor(arr.length / 2)
+      let midVal = arr.splice(mid, 1)[0]
+      let left = [], right = []
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] >= midVal) {
+          right.push(arr[i])
+        } else {
+          left.push(arr[i])
+        }
+      }
+      return quickSort(left).concat([midVal], quickSort(right))
+    }
+
+
+
+    function selectSort(arr) {
+      if (arr.length <= 1) return arr
+      let len = arr.length
+      for (let i = 0; i < len; i++) {
+        let minIndex = i
+        for (let j = i; j < len; j++) {
+          if (arr[j] < arr[minIndex]) {
+            minIndex = j
+          }
+        }
+        if (minIndex != i) {
+          [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]]
+        }
+      }
+      return arr
+    }
+
+    // console.log(selectSort([5, 4, 3, 2, 6, 1]))
+
+    function insertSort(arr) {
+      if (arr.length <= 1) return arr
+      let len = arr.length
+      let temp;
+      for (let i = 1; i < len; i++) {
+        let j = i;
+        temp = arr[i]
+        while (j > 0 && arr[j - 1] > temp) {
+          arr[j] = arr[j - 1]
+          j--
+        }
+        arr[j] = temp
+      }
+      return arr
+    }
+
+
+
+
+    function bubleSort(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        let flag = true
+        for (let j = 0; j < arr.length - 1 - i; j++) {
+          if (arr[j] > arr[j + 1]) {
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+            flag = false
+          }
+        }
+        if (flag) return arr
+      }
+
+      return arr
+    }
+
+    // console.log(bubleSort([5, 4, 3, 2, 1]))
+
+
+    const coinChange = function (coins, amount) {
+      // debugger
+      let f = []
+      f[0] = 0;
+      for (let i = 1; i <= amount; i++) {
+        f[i] = Infinity
+        for (let j = 0; j < coins.length; j++) {
+          if (i >= coins[j]) {
+            f[i] = Math.min(f[i], f[i - coins[j]] + 1)
+          }
+        }
+      }
+      if (f[amount] === Infinity) {
+        return -1
+      } else {
+        return f[amount]
+      }
+      // if (f[amount]) return f[amount]
+    };
+    // console.log(coinChange([1], 0))
+    var value = [5, 8, 4, 10],
+      size = [1, 1, 2, 3],
+      d = [],
+      n = 4,
+      C = 5;
+    //初始化数组
+    for (var k = 0; k <= n; ++k) {
+      d[k] = [];
+    }
+    for (var i = 0; i <= n; ++i) {
+      // debugger
+      for (var w = 0; w <= C; ++w) {
+        d[i][w] = (i == 0) ? 0 : d[i - 1][w];
+        if (i > 0 && w >= size[i - 1])
+          d[i][w] = Math.max(d[i - 1][w], d[i - 1][w - size[i - 1]] + value[i - 1]);
+      }
+    }
+
+    // console.log(d[4][5])//23
+    // 入参是物品的个数和背包的容量上限，以及物品的重量和价值数组
+    // function knapsack(n, c, w, value) {
+    //   // debugger
+    //   // dp是动态规划的状态保存数组
+    //   const dp = (new Array(c + 1)).fill(0)
+    //   // res 用来记录所有组合方案中的最大值
+    //   let res = -Infinity
+    //   for (let i = 0; i <= n; i++) {
+    //     for (let v = c; v >= w[i]; v--) {
+    //       // 写出状态转移方程
+    //       dp[v] = Math.max(dp[v], dp[v - w[i]] + value[i])
+    //       // 即时更新最大值
+    //       if (dp[v] > res) {
+    //         res = dp[v]
+    //       }
+    //     }
+    //   }
+    //   return res
+    // }
+    // function knapsack(n, c, w, value) {
+    //   const dp = (new Array(c + 1)).fill(0)
+    //   for (let i = 0; i <= n; i++) {
+    //     for (let j = 0; j <= c; j++) {
+    //       d[i][j] = (i == 0) ? 0 : d[i - 1][j];
+    //       if (i > 0 && j >= w[i - 1]) {
+    //         d[i][j] = Math.max(d[i - 1][j], d[i - 1][j - w[i - 1] + value[i - 1]])
+    //       }
+    //     }
+    //   }
+    // }
+    // 入参是一个数字序列
+    const lengthOfLIS = function (nums) {
+      debugger
+      // 缓存序列的长度
+      const len = nums.length
+      // 处理边界条件
+      if (!len) {
+        return 0
+      }
+      // 初始化数组里面每一个索引位的状态值
+      const dp = (new Array(len)).fill(1)
+      // 初始化最大上升子序列的长度为1
+      let maxLen = 1
+      // 从第2个元素开始，遍历整个数组
+      for (let i = 1; i < len; i++) {
+        // 每遍历一个新元素，都要“回头看”，看看能不能延长原有的上升子序列
+        for (let j = 0; j < i; j++) {
+          // 若遇到了一个比当前元素小的值，则意味着遇到了一个可以延长的上升子序列，故更新当前元素索引位对应的状态
+          if (nums[j] < nums[i]) {
+            dp[i] = Math.max(dp[i], dp[j] + 1)
+          }
+        }
+        // 及时更新上升子序列长度的最大值
+        if (dp[i] > maxLen) {
+          maxLen = dp[i]
+        }
+      }
+      // 遍历完毕，最后到手的就是最大上升子序列的长度
+      return maxLen
+    };
+    // console.log(lengthOfLIS([10, 9, 2, 5, 3, 7, 101, 18]))
+    // console.log(knapsack(4, 5, [1, 1, 2, 3], [5, 8, 4, 10]))
+
+
+
+    var longestPalindrome = function (s) {
+      debugger
+      if (s.length < 2) return s
+      let str = '';
+      for (let i = 0; i < s.length; i++) {
+        const str1 = getStr(s, i, i)
+        const str2 = getStr(s, i, i + 1)
+        if (str1.length > str.length || str2.length > str.length) {
+          str = str1.length > str2.length ? str1 : str2
+        }
+      }
+      return str
+    };
+    var getStr = (s, i, j) => {
+      if (s[i] != s[j]) return ''
+      let L = i, R = j;
+      while (L > 0 && R < s.length && s[L - 1] == s[R + 1]) {
+        L--;
+        R++;
+      }
+      return s.substring(L, R + 1)
+    }
+
+    console.log(longestPalindrome('babad'))
+  </script>
+</body>
+
+</html>

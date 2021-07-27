@@ -1,0 +1,1417 @@
+### 链表
+
+##### 翻转链表
+
+```javascript
+let reverseListNode=function(head){
+  
+  let pre ,cur,fir
+  fir=head
+  pre=head
+  cur=head.next
+  while(cur){
+    let temp=cur.next
+    cur.next=pre
+    pre=cur
+    cur=temp
+  }
+  head.next=null
+  return pre
+}
+```
+
+
+
+##### 局部反转(m)
+
+> 反转从位置 m 到 n 的链表。请使用一趟扫描完成反转。
+>
+> 说明:
+> 1 ≤ m ≤ n ≤ 链表长度。
+>
+> 示例:
+>
+> 输入: 1->2->3->4->5->NULL, m = 2, n = 4
+> 输出: 1->4->3->2->5->NULL`
+
+
+
+```javascript
+ /**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+    /**
+     * @param {ListNode} head
+     * @param {number} m
+     * @param {number} n
+     * @return {ListNode}
+     */
+    var reverseBetween = function (head, m, n) {
+      let fir = new ListNode()
+      fir.next = head
+      
+      let pre, cur, start, finish
+      let p = fir
+      for (let i = 0; i < m - 1; i++) {
+        p = p.next
+      }
+      start = p.next // 反转开始的节点即m
+      finish = p  // 反转结束的前一个节点
+      pre = start  // 第一个节点
+      cur = pre.next  // 第2个节点
+      for (let i = m; i < n; i++) {
+        let temp = cur.next  // 记录下第三个节点
+        cur.next = pre  // 将第二指向第一
+        pre = cur  // 两个指针向前移动
+        cur = temp
+      }
+      
+      start.next = cur
+      finish.next = pre
+      return fir.next
+    };
+```
+
+##### 
+
+
+
+##### 判断链表是否成环(e)
+
+> 给定一个链表，判断链表中是否有环。  leeetcode:141
+
+标记法，也可用快慢指针来做，空间复杂度低一些
+
+```javascript
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var hasCycle = function(head) {
+    while(head){
+        if(head.flag){
+            return true
+        }else{
+            head.flag=true
+            head=head.next
+        }
+    }
+    return false
+};
+```
+
+
+
+### 栈
+
+##### 有效括号问题（栈-e）
+
+> 题目描述：给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。LeetCode-20
+>
+> 左括号必须用相同类型的右括号闭合。左括号必须以正确的顺序闭合。注意空字符串可被认为是有效字符串。
+>
+> 输入: "()[]{}" 输出: true   输入: "([)]" 输出: false
+
+```javascript
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+
+let mapObj={
+    '(':')',
+    '{':'}',
+    '[':']'
+}
+let isValid = function(s) {
+    let stack= []
+    for(let i=0;i<s.length;i++){
+        let cur=s[i]
+        if(cur=='('||cur=='{'||cur=='[') stack.push(mapObj[cur])
+        else{
+            if(stack.length==0) return false
+            if(stack.pop()!==cur) return false
+        }
+    }
+    return !stack.length
+};
+```
+
+
+
+##### 每日温度问题  (单调栈-m)
+
+> 请根据每日 气温 列表，重新生成一个列表。对应位置的输出为：要想观测到更高的气温，至少需要等待的天数。如果气温在这之后都不会升高，请在该位置用 0 来代替。  leetcode-739
+>
+> 例如，给定一个列表 temperatures = [73, 74, 75, 71, 69, 72, 76, 73]，你的输出应该是 [1, 1, 4, 2, 1, 1, 0, 0]。
+>
+
+```javascript
+/**
+ * @param {number[]} T
+ * @return {number[]}
+ */
+var dailyTemperatures = function(T) {
+    let stack=[]
+    let res =new Array(T.length).fill(0) 
+    for(let i=0;i<T.length;i++){
+        while(stack.length>0&&T[i]>T[stack[stack.length-1]]){
+            res[stack[stack.length-1]]=i-stack[stack.length-1]
+            stack.pop()
+        }
+        stack.push(i)
+    }
+    return res
+};
+```
+
+##### 最小栈-e
+
+>设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。
+>
+>push(x) —— 将元素 x 推入栈中。
+>pop() —— 删除栈顶的元素。
+>top() —— 获取栈顶元素。
+>getMin() —— 检索栈中的最小元素。  l-155
+>
+
+```javascript
+/**
+ * initialize your data structure here.
+ */
+var MinStack = function() {
+    this.stack=[]
+    this.stack1=[]
+};
+
+/** 
+ * @param {number} x
+ * @return {void}
+ */
+MinStack.prototype.push = function(x) {
+    this.stack.push(x)
+    if(!this.stack1.length||x<=this.stack1[this.stack1.length-1]){
+        this.stack1.push(x)
+    }
+};
+
+/**
+ * @return {void}
+ */
+MinStack.prototype.pop = function() {
+    if(this.stack.pop()===this.stack1[this.stack1.length-1]){
+        this.stack1.pop()
+    }
+    
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.top = function() {
+    return this.stack[this.stack.length-1]
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.getMin = function() {
+    return this.stack1[this.stack1.length-1]
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * var obj = new MinStack()
+ * obj.push(x)
+ * obj.pop()
+ * var param_3 = obj.top()
+ * var param_4 = obj.getMin()
+ */
+```
+
+### 队列
+
+##### 用栈实现队列 -e
+
+> 请你仅使用两个栈实现先入先出队列。队列应当支持一般队列的支持的所有操作（push、pop、peek、empty）：
+>
+> 实现 MyQueue 类：
+>
+> void push(int x) 将元素 x 推到队列的末尾
+> int pop() 从队列的开头移除并返回元素
+> int peek() 返回队列开头的元素
+> boolean empty() 如果队列为空，返回 true ；否则，返回 false   l-232
+
+原理，将stack1出栈到stack2后， stack2的出栈顺序  就是 队列的出队顺序
+
+
+```javascript
+/**
+ * Initialize your data structure here.
+ */
+var MyQueue = function() {
+    this.stack1=[]
+    this.stack2=[]
+};
+
+/**
+ * Push element x to the back of queue. 
+ * @param {number} x
+ * @return {void}
+ */
+MyQueue.prototype.push = function(x) {
+    this.stack1.push(x)
+    if(this.stack2.length==0){
+        while(this.stack1.length){
+            this.stack2.push(this.stack1.pop())
+        }
+    }
+};
+
+/**
+ * Removes the element from in front of queue and returns that element.
+ * @return {number}
+ */
+MyQueue.prototype.pop = function() {
+    let val=this.stack2.pop() 
+    if(this.stack2.length==0){
+        while(this.stack1.length){
+            this.stack2.push(this.stack1.pop())
+        }
+    }
+    return val
+};
+
+/**
+ * Get the front element.
+ * @return {number}
+ */
+MyQueue.prototype.peek = function() {
+    return this.stack2[this.stack2.length-1]
+};
+
+/**
+ * Returns whether the queue is empty.
+ * @return {boolean}
+ */
+MyQueue.prototype.empty = function() {
+    return this.stack2.length===0&&this.stack1.length===0
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * var obj = new MyQueue()
+ * obj.push(x)
+ * var param_2 = obj.pop()
+ * var param_3 = obj.peek()
+ * var param_4 = obj.empty()
+ */
+```
+
+##### 滑动窗口 -h
+
+> 给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+>
+> 返回滑动窗口中的最大值。  l-239
+>
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number[]}
+ */
+var maxSlidingWindow = function(nums, k) {
+    let queue=[]
+    let res=[]
+    for(let i=0;i<nums.length;i++){
+        while(queue.length&&nums[queue[queue.length-1]]<nums[i]){
+            queue.pop()
+        }
+        queue.push(i)
+        while(queue.length&&queue[0]<=i-k){
+            queue.shift()
+        }
+        if(i>=k-1){
+            res.push(nums[queue[0]])
+        }
+    }
+    return res
+};
+```
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ 给定 n 个整数，找出平均数最大且长度为 k 的连续子数组，并输出该最大平均数。 643-e
+ */
+var findMaxAverage = function(nums, k) {
+    let sum=0
+    let max=nums.slice(0,k).reduce((p,c)=>p+c,0)
+    sum=max
+    let s=0
+    for(let i=k;i<nums.length;i++){
+        sum=sum-nums[s]+nums[i]
+        max=Math.max(sum,max) 
+        s++
+    }
+    return max/k
+};
+```
+
+窗口一般是利用指针（数组索引）来实现的，动态的窗口通过移动指针来实现，什么时候移动左指针，什么时候移动右指针
+
+```javascript
+/**
+ * @param {string} s
+ * @return {number}   3-m
+ */
+// for循环的i 与 right两个指针
+var lengthOfLongestSubstring = function(s) {
+    let obj=new Set()
+    let right=0,max=0,len=s.length
+    for(let i=0;i<len;++i){
+        while(right<len&&!obj.has(s[right])){
+            
+            obj.add(s[right])
+            right++;
+        }
+        obj.delete(s[i])
+        max=Math.max(max,right-i)
+    }
+    return max
+};
+```
+
+滑动窗口随着右指针扩大后，再去收缩左指针，确定范围，窗口大小发生变化
+
+```javascript
+/**
+ * @param {string} s
+ * @param {string} p
+ * @return {number[]}  435-m
+ */
+var findAnagrams = function(s, p) {
+    if (!s || !p) return [];
+    let need = {}, win = {}, res = [];
+    [...p].forEach(c => need[c] ? need[c]++ : need[c] = 1);
+    let l = 0, r = 0, count = 0, allC = Object.keys(need).length;
+    while (r < s.length) {
+        let rStr = s[r];
+        if (need[rStr]) {
+            win[rStr] ? win[rStr]++ : win[rStr] = 1;
+            if (win[rStr] === need[rStr]) count++;
+        }
+        r++;
+        while (count === allC) {
+            let lStr = s[l];
+            if ((r - l) === p.length) res.push(l);
+            if (need[lStr]) {
+                win[lStr]--;
+                if(win[lStr]<need[lStr])count--;
+            }
+            l++;
+        }
+    }
+    return res;
+};
+```
+
+把n方的复杂度降到n，外层的for循环的i不一定为左指针，也可为右指针，收缩窗口的范围很重要
+
+```javascript
+/**
+ * @param {number} s
+ * @param {number[]} nums
+ * @return {number}  209-m
+ */
+var minSubArrayLen = function(s, nums) {
+    let min=Infinity
+    let sum=0
+    let l=0
+    for(let i=0;i<nums.length;++i){
+        sum+=nums[i]
+        while(sum>=s){
+            min=Math.min(min,i-l+1)
+            sum-=nums[l++]
+        }
+        
+    }
+    return min===Infinity?0:min
+};
+```
+
+
+
+### 二叉树
+
+#####  广度遍历BFS
+
+> 给你一个二叉树，请你返回其按 **层序遍历** 得到的节点值。 （即逐层地，从左到右访问所有节点）。 
+>
+> leet-102 m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[][]}
+ */
+
+// 自己写的方法不好理解
+/**
+var levelOrder = function (root) {
+      if(!root) return []
+      let queen = []
+      let res = []
+      queen.push([root])
+      res.push([root.val])
+      while (queen.length) {
+        const top = queen[0]
+        for (let i = 0; i < top.length; i++) {
+          if (top[i].left) {
+            if (queen.length === 1) queen.push([])
+            queen[queen.length - 1].push(top[i].left)
+          }
+          if (top[i].right) {
+            if (queen.length === 1) queen.push([])
+            queen[queen.length - 1].push(top[i].right)
+          }
+        }
+        if (queen.length > 1) res.push(queen[queen.length - 1].map(item => item.val))
+        queen.shift()
+      }
+      return res
+    };
+**/
+// 小册上的方法   几乎就是模板了  还有递归的版本
+var levelOrder = function (root) {
+        if(!root) return []
+        let res=[]
+        let quene=[]
+        quene.push(root)
+        while(quene.length){
+            let cur=[]
+            let len=quene.length
+            
+            for(let i=0;i<len;i++){
+                let top=quene.shift()
+                if(top.left){
+                    quene.push(top.left)
+                }
+                if(top.right){
+                    quene.push(top.right)
+                }
+                cur.push(top.val)
+            }
+            res.push(cur)
+        }
+        return res
+    }
+```
+
+回溯
+
+> 给定两个整数 *n* 和 *k*，返回 1 ... *n *中所有可能的 *k* 个数的组合。 77-m
+
+```javascript
+* @param {number} n
+ * @param {number} k
+ * @return {number[][]}
+ */
+var combine = function(n, k) {
+    let res=[]
+    let cur=[]
+    function dfs(nth){
+        if(k==cur.length){
+            return res.push(cur.slice()) 
+        }
+        for(let i=nth;i<n+1;i++){
+            cur.push(i)
+            dfs(i+1)
+            cur.pop()
+        }
+    }
+    dfs(1)
+    return res
+};
+```
+
+##### 二叉树的遍历
+
+> 先序遍历  144-m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var preorderTraversal = function(root) {
+    let res=[]
+    if(!root) return res
+    let stack=[]
+    stack.push(root)
+    while(stack.length){
+        let cur=stack.pop()
+        res.push(cur.val)
+        if(cur.right){
+            stack.push(cur.right)
+        }
+        if(cur.left){
+            stack.push(cur.left)
+        }
+    }
+    return res
+};
+```
+
+> 后序遍历  l-m-145
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var postorderTraversal = function(root) {
+    let res=[]
+    if(!root) return res
+    let stack=[]
+    stack.push(root)
+    while(stack.length){
+        let cur=stack.pop()
+        res.unshift(cur.val)
+        if(cur.left){
+            stack.push(cur.left)
+        }
+        if(cur.right){
+            stack.push(cur.right)
+        }
+    }
+    return res
+};
+```
+
+```javascript
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ 
+ 	所有节点的值都是唯一的。
+	p、q 为不同节点且均存在于给定的二叉树中。
+ */  // l-236  最近公共祖先  利用后序遍历 将满足的值回溯
+/**
+ * @param {TreeNode} root
+ * @param {TreeNode} p
+ * @param {TreeNode} q
+ * @return {TreeNode}
+ */
+var lowestCommonAncestor = function(root, p, q) {
+    if(!root||root===p||root===q) return root
+    let left=lowestCommonAncestor(root.left, p, q)
+    let right=lowestCommonAncestor(root.right, p, q)
+    if(left===null&&right===null) return null
+    if(left===null) return right
+    if(right===null) return left
+    return root
+};
+```
+
+
+
+中序遍历 m-94
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number[]}
+ */
+var inorderTraversal = function(root) {
+    let res=[]
+    if(!root) return res
+    let stack=[]
+    let cur=root
+    while(cur||stack.length){
+        while(cur){
+            stack.push(cur)
+            cur=cur.left
+        }
+        cur=stack.pop()
+        res.push(cur.val)
+        cur=cur.right
+    }    
+    return res
+};
+```
+
+##### 二叉搜索树
+
+> 给定二叉搜索树（BST）的根节点和一个值。 你需要在BST中找到节点值等于给定值的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 NULL。  l-700-e
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} val
+ * @return {TreeNode}
+ */
+var searchBST = function(root, val) {
+    
+    if(!root) return root
+    if(root.val==val) return root
+    if(root.val>val){
+         return searchBST(root.left,val)
+    }else{
+        return searchBST(root.right,val)
+    }
+};
+```
+
+添加
+
+> 给定二叉搜索树（BST）的根节点和要插入树中的值，将值插入二叉搜索树。 返回插入后二叉搜索树的根节点。 输入数据 保证 ，新值和原始二叉搜索树中的任意节点值都不同。 l-701-m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} val
+ * @return {TreeNode}
+ */
+var insertIntoBST = function(root, val) {
+    if(!root) return (new TreeNode(val))
+    if(root.val>val){
+        root.left=insertIntoBST(root.left,val)
+    }else{
+        root.right=insertIntoBST(root.right,val)
+    }
+    return root
+};
+```
+
+删除节点
+
+> 给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+>
+> l-450-m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} key
+ * @return {TreeNode}
+ */
+var deleteNode = function(root, key) {
+    if(!root) return root
+    if(root.val===key){
+        if(!root.left&&!root.right){
+            root=null
+        }else if(root.left){
+            let maxNode=findMax(root.left)
+            root.val=maxNode.val
+            root.left=deleteNode(root.left,maxNode.val)
+        }else if(root.right){
+            let minNode=findMin(root.right)
+            root.val=minNode.val
+            root.right=deleteNode(root.right,minNode.val)
+        }
+    }else if(root.val>key){
+        root.left=deleteNode(root.left,key)
+    }else{
+        root.right=deleteNode(root.right,key)
+    }
+
+
+    return root
+};
+var findMax=function(root){
+    while(root.right){
+        root=root.right
+    }
+    return root
+}
+var findMin=function(root){
+    while(root.left){
+        root=root.left
+    }
+    return root
+}
+```
+
+验证二叉搜索树
+
+> 给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+>
+> l-98-m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+var isValidBST = function(root) {
+    var dfs=function(root,min,max){
+        if(!root) return true
+        if(root.val<=min||root.val>=max) return false
+        return dfs(root.left,min,root.val)&&dfs(root.right,root.val,max)
+    }
+    return dfs(root,-Infinity,Infinity)
+};
+```
+
+> 将一个按照升序排列的有序数组，转换为一棵高度平衡二叉搜索树。
+>
+> 本题中，一个高度平衡二叉树是指一个二叉树*每个节点 *的左右两个子树的高度差的绝对值不超过 1。
+>
+> l-108-e
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {number[]} nums
+ * @return {TreeNode}
+ */
+var sortedArrayToBST = function(nums) {
+    if(!nums.length) return null
+    function bst(s,e){
+        if(s>e) return null
+        let mid=Math.floor((s+e)/2)
+        let cur=new TreeNode(nums[mid])
+        cur.left=bst(s,mid-1)
+        cur.right=bst(mid+1,e)
+        return cur
+    }
+    let root =bst(0,nums.length-1)
+    return root
+};
+```
+
+##### 二叉平衡树
+
+> 验证二叉平衡树    l-110-e
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+
+// 没有提前阻断，计算量大
+
+// var isBalanced = function(root) {
+//     let flag=true
+//     function dfs(root){
+//         if(!root||!flag){
+//             return 0
+//         }
+//         let left=dfs(root.left)
+//         let right=dfs(root.right)
+//         if(Math.abs(left-right)>1){
+//             flag=false;
+//             return 0
+//         }
+//         return Math.max(left,right)+1
+//     }
+//     dfs(root)
+//     return flag
+// };
+
+//从底至顶（提前阻断）
+var isBalanced = function(root) {
+    function dfs(root){
+        if(!root){
+            return 0
+        }
+        let left=dfs(root.left)
+        if(left==-1) return -1
+        let right=dfs(root.right)
+        if(right==-1) return -1
+        return Math.abs(left-right)>1?-1:(Math.max(left,right)+1)
+    }
+    
+    return dfs(root)!==-1
+};
+```
+
+
+
+> 给你一棵二叉搜索树，请你返回一棵 **平衡后** 的二叉搜索树，新生成的树应该与原来的树有着相同的节点值。
+>
+> l-1382-m
+
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val) {
+ *     this.val = val;
+ *     this.left = this.right = null;
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {TreeNode}
+ */
+var balanceBST = function(root) {
+    let arr=[]
+    function inOrder(root){
+        if(!root) return null
+        inOrder(root.left)
+        arr.push(root.val)
+        inOrder(root.right)
+
+    }
+    function buildBSt(s,e){
+        if(s>e) return null
+        let mid=Math.floor((s+e)/2)
+        let cur=new TreeNode(arr[mid])
+        cur.left=buildBSt(s,mid-1)
+        cur.right=buildBSt(mid+1,e)
+        return cur
+    }
+    inOrder(root)
+    return buildBSt(0,arr.length-1)
+
+};
+```
+
+
+
+
+
+### 排序
+
+##### 归并排序
+
+```javascript
+// 先拆分到细腻度最小，再合并
+function mergeSort(arr) {
+      const len = arr.length
+      if (len <= 1) return arr
+      const mid = Math.floor(len / 2)
+      const leftArr = mergeSort(arr.slice(0, mid))
+      const rightArr = mergeSort(arr.slice(mid))
+      return mergeArr(leftArr, rightArr)
+}
+function mergeArr(arr1, arr2) {
+
+      let j = 0, k = 0
+      const res = []
+      const len1 = arr1.length
+      const len2 = arr2.length
+      while (j < len1 && k < len2) {
+        if (arr1[j] <= arr2[k]) {
+          res.push(arr1[j])
+          j++
+        } else {
+          res.push(arr2[k])
+          k++
+        }
+      }
+      if (j < len1) {
+        return res.concat(arr1.slice(j))
+      } else {
+        return res.concat(arr2.slice(k))
+      }
+}
+```
+
+##### 快排
+
+```javascript
+// 递归的写法，也是分治的思想
+function quickSort(arr) {
+      if (arr.length <= 1) return arr
+      let mid = Math.floor(arr.length / 2)
+      let midVal = arr.splice(mid, 1)[0]
+      let left = [], right = []
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] >= midVal) {
+          right.push(arr[i])
+        } else {
+          left.push(arr[i])
+        }
+      }
+      return quickSort(left).concat([midVal], quickSort(right))
+    }
+```
+
+##### 选择排序
+
+```javascript
+// 选择最小的与首位交换
+function selectSort(arr) {
+      if (arr.length <= 1) return arr
+      let len = arr.length
+      for (let i = 0; i < len; i++) {
+        let minIndex = i
+        for (let j = i; j < len; j++) {
+          if (arr[j] < arr[minIndex]) {
+            minIndex = j
+          }
+        }
+        if (minIndex != i) {
+          [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]]
+        }
+      }
+      return arr
+    }
+```
+
+##### 插入排序
+
+```javascript
+function insertSort(arr) {
+      if (arr.length <= 1) return arr
+      let len = arr.length
+      let temp;
+      for (let i = 1; i < len; i++) {
+        let j = i;
+        temp = arr[i]
+        while (j > 0 && arr[j - 1] > temp) {
+          arr[j] = arr[j - 1]
+          j--
+        }
+        arr[j] = temp
+      }
+      return arr
+}
+```
+
+##### 冒泡排序
+
+```javascript
+function bubleSort(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        let flag = true
+        for (let j = 0; j < arr.length - 1 - i; j++) {
+          if (arr[j] > arr[j + 1]) {
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+            flag = false
+          }
+        }
+        if (flag) return arr
+      }
+
+      return arr
+}
+```
+
+
+
+### 动态规划
+
+> 假设你正在爬楼梯。需要 *n* 阶你才能到达楼顶。
+>
+> 每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？
+>
+> **注意：**给定 *n* 是一个正整数。  l-70-e
+
+```javascript
+/**
+ * @param {number} n
+ * @return {number}
+ */
+var climbStairs = function(n) {
+    let fn=[]
+    fn[1]=1;
+    fn[2]=2;
+    for(let i=3;i<=n;i++){
+        fn[i]=fn[i-1]+fn[i-2]
+    }
+    return fn[n]
+};
+```
+
+> 给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
+>
+> 你可以认为每种硬币的数量是无限的。 l-322-m
+>
+
+```javascript
+/**
+ * @param {number[]} coins
+ * @param {number} amount
+ * @return {number}
+ */
+var coinChange = function(coins, amount) {
+      let f = []
+      f[0] = 0;
+      for (let i = 1; i <= amount; i++) {
+        f[i] = Infinity
+        for (let j = 0; j < coins.length; j++) {
+          if (i >= coins[j]) {
+            f[i] = Math.min(f[i], f[i - coins[j]] + 1)
+          }
+        }
+      }
+      if (f[amount] === Infinity) {
+        return -1
+      }else{
+        return f[amount]  
+      }
+      
+};
+```
+
+##### 01背包
+
+```javascript
+//入参是物品的个数和背包的容量上限，以及物品的重量和价值数组
+function knapsack(n, c, w, value) {
+      const dp = (new Array(c + 1)).fill(0)
+      for (let i = 0; i <= n; i++) {
+        for (let j = 0; j <= c; j++) {
+          d[i][j] = (i == 0) ? 0 : d[i - 1][j];
+          if (i > 0 && j >= w[i - 1]) {
+            d[i][j] = Math.max(d[i - 1][j], d[i - 1][j - w[i - 1] + value[i - 1]])
+          }
+        }
+      }
+    }
+
+console.log(knapsack(4, 5, [1, 1, 2, 3], [5, 8, 4, 10]))  
+// 用的二维数组，可用滚动数组来优化
+```
+
+> 给定一个无序的整数数组，找到其中最长上升子序列的长度。 l-300-m
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var lengthOfLIS = function(nums) {
+    if(nums.length==0) return 0
+    let maxLength=1
+    let res=new Array(nums.length).fill(1)
+    for(let i=1;i<nums.length;i++){
+        for(let j=0;j<i;j++){
+            if(nums[j]<nums[i]){
+                res[i]=Math.max(res[i],res[j]+1)
+            }
+        }
+        if(res[i]>maxLength){
+            maxLength=res[i]
+        }
+    }
+    return maxLength
+};
+```
+
+```javascript
+// 最大子序列的和  53-m   还可优化空间复杂度
+
+var maxSubArray = function(nums) {
+    let dp=[nums[0]]
+    let max=nums[0]
+    for(i=1;i<nums.length;i++){
+        dp[i]=Math.max((dp[i-1]+nums[i]),nums[i])
+        dp[i]>max?max=dp[i]:''
+    }
+    return max
+};
+```
+
+
+
+
+
+### 真题
+
+> 最长回文子串   l-5-m
+
+```javascript
+/**
+ * @param {string} s
+ * @return {string}
+ */
+var longestPalindrome = function(s) {
+    if(s.length<2) return s
+    let str = '';
+    for( let i = 0; i < s.length; i++){
+        const str1 = getStr(s, i,i) // 奇数回文
+        const str2 = getStr(s, i,i+1) // 偶数回文
+        if( str1.length > str.length || str2.length > str.length ){
+            str = str1.length > str2.length ? str1 : str2
+        }
+    }
+	return str
+};
+var getStr = ( s, i , j) => {
+	if( s[i] != s[j] ) return ''
+    let L = i , R = j ;
+    while( L > 0 && R < s.length-1 && s[L-1] == s[R+1] ){
+        L--;
+        R++;
+    }
+    return s.substring(L,R+1)
+}
+```
+
+### 双指针  
+
+用在数组和链表中，循环中的i一般用作指针之一
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var removeDuplicates = function(nums) {
+    let l=0
+    for(let i=1;i<nums.length;++i){
+        if(nums[i]!=nums[l]){
+            nums[l+1]=nums[i]
+            l++
+        }
+    }
+    return l+1
+};
+```
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} val
+ * @return {number}
+ */
+var removeElement = function(nums, val) {
+    let l=0
+    for(let i=0;i<nums.length;++i){
+        if(nums[i]!==val){
+            nums[l]=nums[i]
+            l++
+        }
+    }
+    return l
+};
+```
+
+回文判断
+
+```javascript
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+var isPalindrome = function(s) {
+    if(!s) return true
+    s=s.toLocaleLowerCase()
+    let l=0;
+    let r=s.length-1
+    while(l<=r){
+        while (isStep(l, s)&&l<s.length) {
+          l++
+        }
+        while (isStep(r, s)&&r>=0) {
+          r--
+        }
+        if(s[l]===s[r]){
+            l++;
+            r--
+        }else{
+            return false
+        }
+    }
+    return true
+};
+function isStepped(index,s){
+    if(!s[index]) return true
+    let code=s.charCodeAt(index)
+    // if(code>=65&&code<=90) return false
+    if(code>=97&&code<=122) return false
+    if(code>=48&&code<=57) return false
+    return true
+}
+```
+
+
+
+### 二分查找
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+var searchInsert = function(nums, target) {
+    const n = nums.length;
+    let left = 0, right = n - 1, ans = n;
+    while (left <= right) {
+        let mid = ((right - left) >> 1) + left;  // 有符号右移不会影响符号位。
+        if (target <= nums[mid]) {
+            ans = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return ans;
+};
+```
+
+这题的第一反应是一步步去用`x * x`暴力计算，但是这种解法会超时。
+
+所以用一种`快速幂`计算的方式，也就是把 x 的 n 次方转化为 x * x 的 n / 2 次方。
+
+比如求 2 的 10 次方可以转为 4 的 5 次方，这时候遇到奇数次方了，就转化为 4* (4 的 4 次方)。
+
+然后对于 4 的 4 次方，再进一步转化为 16 的 2 次方，最后转为 256 的 1 次方 * 4，就得出最终解 1024。
+
+```javascript
+/**
+ * @param {number} x
+ * @param {number} n
+ * @return {number}
+ */
+var myPow = function (x, n) {
+  if (n === 0) return 1;
+  if (n === 1) return x;
+  let abs = Math.abs(n);
+  let isMinus = abs !== n;
+
+  let res = abs % 2 === 0 ? myPow(x * x, abs / 2) : x * myPow(x, abs - 1);
+  return isMinus ? 1 / res : res;
+};
+```
+查找target
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ 704-e
+ */
+var search = function(nums, target) {
+    let l =0
+    let r =nums.length-1
+    while(r>=l){
+        let mid=((r-l)>>1) + l
+        if(target<nums[mid]){
+            r=mid-1
+        }else if(target>nums[mid]){
+            l=mid+1
+        }else{
+            return mid
+        }
+    }
+    return -1
+};
+```
+
+求平方根
+
+```javascript
+/**
+ * @param {number} x
+ * @return {number}
+ */
+var mySqrt = function(x) {
+    if(x<=1) return Math.floor(x)
+    let l=0;
+    let r=x;
+    let ans=-1
+    while(l<=r){
+        let mid=(l+r)>>1
+        if(mid*mid<=x){
+            ans=mid   // 取小值是合理的
+            l=mid+1 
+        }else{
+            r=mid-1
+        }
+    }
+    return ans
+};
+```
+
