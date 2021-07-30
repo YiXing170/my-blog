@@ -1,0 +1,63 @@
+### **HTTP2.0 的新特性**
+
+- **新的二进制格式**（Binary Format），HTTP1.x 的解析是基于文本。基于文本协议的格式解析存在天然缺陷，文本的表现形式有多样性，要做到健壮性考虑的场景必然很多，二进制则不同，只认 0 和 1 的组合。基于这种考虑 HTTP2.0 的协议解析决定采用二进制格式，实现方便且健壮。
+- **多路复用**（MultiPlexing），即连接共享，即每一个 request 都是是用作连接共享机制的。一个 request 对应一个 id，这样一个连接上可以有多个 request，每个连接的 request 可以随机的混杂在一起，接收方可以根据 request 的 id 将 request 再归属到各自不同的服务端请求里面
+
+
+- **header 压缩，**如上文中所言，对前面提到过 HTTP1.x 的 header 带有大量信息，而且每次都要重复发送，HTTP2.0 使用 encoder 来减少需要传输的 header 大小，通讯双方各自 cache 一份 header fields 表，既避免了重复 header 的传输，又减小了需要传输的大小。
+- **服务端推送**（server push），同 SPDY 一样，HTTP2.0 也具有 server push 功能。目前，有大多数网站已经启用 HTTP2.0，例如 [YouTuBe](https://www.youtube.com/)，[淘宝网](http://www.taobao.com/)等网站，利用 chrome 控制台可以查看是否启用 H2：
+
+### https握手过程
+
+1、客户端向服务器端发送一个`Client Hello`
+
+随机数1，支持的tls版本，加密套件列表
+
+2、服务器端想客户端返回一个`Server Hello`
+
+确认使用的tls版本和加密套件，随机数2
+
+3、服务器端向客户端返回一个`Certificate`
+
+服务端向客户端下发证书
+
+4、服务器端向客户端返回`Server key change,Server Hello Done`
+
+服务器端返回给客户端相关D-H算法参数，即server_params
+
+5、客户端向服务器端发送`Client Key Exchange, Change Cipher Spec, Encrypted Handshake Message`
+
+(这一段存疑，需要再去看看文档，可简单理解为：Client 验证证书，生成secret，Server 中也生成 secret)
+
+客户端根据传过来的公钥 生成一份预备主密钥（pre-master-key），并将这个预备-主密钥传给服务器端。服务器端结合自己的私钥解出这个预备-主密钥的信息，得到**第三个随机数**，接着两边根据D-H算法及第四步传递的相关参数生成一个`会话密钥`，后续就使用这个密钥进行通信了
+
+6、服务器端向客户端返回`Change Cipher Spec, Encrypted Handshake Message`
+
+服务端解析出秘钥，确认秘钥一致
+
+
+
+### http1.1和1.0的区别
+
++ 长连接
+
+  + 当建立起一个tcp连接之后，多个http访问可以复用这个连接，是通过http请求头中的keep-alive来标识的
+
+    其次，http1.1支持了连接的管道化。管道化使得连接请求可以“并行”的发送（并不是真的并行）。比如当我们请求一个index.html的时候，不必等到index.html返回我们就可以继续请求img资源。但是服务端还是按照FIFO来响应的。所以并不是真的并行
+    现在的浏览器都允许建立多个TCP连接来进行并行请求。但因为浏览器自身的Max-Connection最大连接数的限制，同一个域名（host）下能够建立的TCP数量是一定的。所以我们可以采用CDN将静态资源文件放在不同域名下来保证请求的速度。
+
++ 宽带优化
+
+  + 在http1.1中，增加了range头域，它允许只请求某个资源的一部分，返回码是206。方便了开发者自由的选择以便于充分的利用宽带。
+    http1.1支持head请求，也就是只有响应头，没用响应正文。
+
++ host头处理
+
+  + http1.1增加了host请求头字段，在http1.0中认为一个服务器绑定一个唯一的域名。但现在一台服务器上可以有多个虚拟主机，共享一个ip。
+    如果消息头中没用host字段，会报400错误
+
++ 缓存新字段
+
+  + E-tag    if-match  if-not-match
+
+    ​

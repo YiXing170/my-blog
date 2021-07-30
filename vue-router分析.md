@@ -27,7 +27,7 @@ history 提供类似 hashchange 事件的 popstate 事件，但 popstate 事件�
 1. 通过浏览器前进后退改变 URL 时会触发 popstate 事件
 2. 通过pushState/replaceState或<a>标签改变 URL **不会触发 popstate 事件**。
 3. 好在我们可以拦截 pushState/replaceState的调用和a标签的点击事件来检测 URL 变化
-4. 通过js 调用history的back，go，forward方法课触发该事件
+4. 通过js 调用history的back，go，forward方法可触发该事件
 
 所以监听 URL 变化可以实现，只是没有 hashchange 那么方便。
 
@@ -124,7 +124,7 @@ var _wr = function(type) {
  history.replaceState = _wr('replaceState');
 
 window.addEventListener('replaceState', function(e) {
-  console.log('THEY DID IT AGAIN! replaceState 111111');
+  console.log('THEY DID IT AGAIN! replaceState 111111'); // 拦截后做组件渲染
 });
 window.addEventListener('pushState', function(e) {
   console.log('THEY DID IT AGAIN! pushState 2222222');
@@ -155,7 +155,6 @@ VueRouter.install = function () {
 }
 
 export default VueRouter
-
 ```
 
 
@@ -501,7 +500,7 @@ Vue.component('router-link',{
 })
 ```
 
-总结： Vue.use()进行 $router和$route 的挂载（此时并不是真正挂载，只是利用mixin ，让每个组件都有beforecreated钩子，其中作了 $router 和  $route 的代理，再 new VueRouter()得到全局router，在在new Vue（）中传进去router配置，每个组件执行beforecreated钩子后就会有 $  router 和 $ route 属性
+总结： Vue.use()进行 $router和$route 的挂载（此时并不是真正挂载，只是利用mixin ，让每个组件都有beforecreated钩子，其中作了 $router 和  ​$route 的代理，再 new VueRouter()得到全局router，在在new Vue（）中传进去router配置，每个组件执行beforecreated钩子后就会有 $  router 和 $ route 属性
 
 
 
