@@ -24,7 +24,7 @@ FC（Formatting Context）就是html页面中的某个元素内的**一套渲染
 
 2.垂直方向上的距离由margin决定，属于同一个BFC的两个相邻Box的margin会发生重叠。
 
- 上下相邻的两个元素 2.父元素与子元素的margin发生重叠
+ 1 上下相邻的两个元素 2.父元素与子元素的margin发生重叠
 
 3  bfc的区域不会与float的元素区域重叠。
 

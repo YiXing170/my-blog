@@ -203,7 +203,7 @@ anotherPerson.sayHi(); //"hi"
 
 2 寄生的方式增强对象
 
-```
+```javascript
 function inheritPrototype(subType, superType){
   var prototype = Object.create(superType.prototype); // 创建对象，创建父类原型的一个副本
   prototype.constructor = subType;                    // 增强对象，弥补因重写原型而失去的默认的constructor 属性
@@ -459,7 +459,6 @@ var Animal = (function() {
 
   return Animal
 })()
-
 ```
 
 例子长了不少，但其实主要的变化只有两个：一是 `Animal` 被包了一层而不是直接返回；二是新增的方法 `move` 和 `getName` 是通过一个 `_createClass()` 方法来实现的。它将两个方法以 `key`/`value` 的形式作为数组传入，看起来，是要把它们设置到 `Animal` 的原型链上面，以便后续继承之用
@@ -573,7 +572,6 @@ var Tiger = (function(_Animal) {
 
   return Tiger
 })(Animal)
-
 ```
 
 

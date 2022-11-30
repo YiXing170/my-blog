@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+
+
+    // function* foo() {
+    //   yield 'res1'
+    //   yield 'res2'
+    //   yield 'res3'
+    // }
+
+
+    // var g = foo()
+    // console.log(g.next())
+    // console.log(g.next())
+    // console.log(g.next())
+
+
+    function gen$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.next = 2;
+            return 'res1'
+
+          case 2:
+            _context.next = 4;
+            return 'res2'
+
+
+
+          case 4:
+            _context.next = 6;
+            return 'res3'
+
+          case 6:
+          case end:
+            return _context.stop();
+        }
+      }
+
+    }
+
+
+    var context = {
+      next: 0,
+      prev: 0,
+      done: false,
+      stop: function stop() {
+        this.done = true
+      }
+    }
+
+
+    let gen = function () {
+      return {
+        next: function () {
+          value = context.done ? undefined : gen$(context)
+          done = context.done;
+          return {
+            value, done
+          }
+        }
+      }
+    }
+
+
+    // 测试案例
+
+    var g = gen()
+    console.log(g.next())
+    console.log(g.next())
+    console.log(g.next())
+    console.log(g.next())
+
+  </script>
+</body>
+
+</html>

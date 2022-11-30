@@ -42,17 +42,17 @@ tcp
 
 例子：初始cwnd窗口大小为1-400
 
-![流量控制](../img/flow-control.jpg)
+![流量控制](./img/flow-control.jpg)
 
 
 
-![流量控制](../img/fc2.jpg)
+![流量控制](./img/fc2.jpg)
 
 
 
 ##### tcp拥塞控制
 
-![拥塞控制](../img/yskz.jpg)
+![拥塞控制](./img/yskz.jpg)
 
  拥塞控制四种算法：
 
@@ -67,13 +67,13 @@ tcp
 + 接收方总是有足够大的缓存空间，因而发送方的拥塞窗口大小由网络的拥塞程度来决定
 + 以最大报文段MSS来的个数来作为讨论的单位，而不是字节
 
-![](../img/y1.jpg)
+![](./img/y1.jpg)
 
 
 
 拥塞控制全流程示例
 
-![](../img/y2.jpg)
+![](./img/y2.jpg)
 
 慢开始：cwnd翻倍
 
@@ -93,7 +93,7 @@ RTT-一个传输轮次的往返时间
 
 要注意超时重传时，RTO直接取为旧RTO的2倍
 
-![](../img/RTO.jpg)、
+![](./img/RTO.jpg)、
 
 
 
@@ -168,7 +168,7 @@ RTT-一个传输轮次的往返时间
      >
      > ACK=1 seq=x+1 ack=w+1
 
-     ![](../img/release.jpg)
+     ![](./img/release.jpg)
 
 + 保活机制
 
@@ -178,6 +178,6 @@ RTT-一个传输轮次的往返时间
 
 ##### tcp的报文格式
 
-![](../img/tcp_header.jpg)
+![](./img/tcp_header.jpg)
 
 

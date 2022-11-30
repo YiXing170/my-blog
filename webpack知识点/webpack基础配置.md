@@ -25,9 +25,9 @@
   >
   > npm会收集bin字段，生成相应的shell/cmd脚本储存在全局的环境变量path中对应的npm目录（用yarn安装的就是在yarn目录下）
   >
-  > ![](./img/path.jpg)
+  > ![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/78efc0b3097f40b384ae6ca118ed0296~tplv-k3u1fbpfcp-watermark.image?)
   >
-  > ![](./img/npm.png)
+  > ![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/790ce2acde654e02b75c03f77c6f11ce~tplv-k3u1fbpfcp-watermark.image?)
   >
   > ______
   >
@@ -101,28 +101,27 @@
 
   执行后：
 
-    ![](./img/1.png)
-
+![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/13735e0ceb094ab99295ffccec6ac046~tplv-k3u1fbpfcp-watermark.image?)
 
     新增dist目录，和目录下的main.js
+![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/45550c3670fc4b4c90ce010907b40b6b~tplv-k3u1fbpfcp-watermark.image?)
 
-    ![](./img/2.png)
 
   可以很明显的看出入口文件，以及在入口文件中依赖了哪些文件，按图索骥都打包进来了
 
   同时有一个配置的警告，执行webpack 的时候未输入mode选项，所以默认为production，也告诉我们还有developent，和none模式。none模式禁止默认行为，代表在其他模式时，webpack内部都有做一些事情，很明显的就是：production下打包出来的代码默认是压缩的。
 
-  ​
+  
 
-  + 但对不同的项目来说，肯定有自定义的需求，所以配置文件还是需要的
++ 但对不同的项目来说，肯定有自定义的需求，所以配置文件还是需要的
 
-  ```javascript
+```javascript
   "scripts": {
       "build": "webpack --config webpack.config.js", // --config 指定后面的文件为配置文件
     }, 
-  ```
+```
 
-  + 根据我们上面提到的出口，入口，模式，先将配置文件写成如下
++ 根据我们上面提到的出口，入口，模式，先将配置文件写成如下
 
 > 注意整个配置中我们使用 Node 内置的 [path 模块](https://nodejs.org/api/path.html)，并在它前面加上 [__dirname](https://nodejs.org/docs/latest/api/globals.html#globals_dirname)这个全局变量。可以防止不同操作系统之间的文件路径问题，并且可以使相对路径按照预期工作
 

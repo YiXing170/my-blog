@@ -77,6 +77,7 @@ document.body.removeChild(node);
 - `onfocus`
 - `onmouseenter`
 - `onmouseleave`
+- `onerror`
 
 
 
@@ -89,11 +90,11 @@ document.body.removeChild(node);
 
 另外还有 `Object.prototype.toString.call()` 进行变量判断。
 
-##### 一句话描述 this
+##### 一句话描述 this 
 
-对于函数而言，指向最后调 
+对于函数而言，指向最后调 用函数的那个对象，是函数运行时内部自动生成的一个内部对象，只能在函数内部使用；对于全局而言，`this` 指向 `window`。
 
-用函数的那个对象，是函数运行时内部自动生成的一个内部对象，只能在函数内部使用；对于全局而言，`this` 指向 `window`。
+this只在js运行时才会确定，而不是看语法位置，所以会产生this隐式（函数赋值）或显式（call，apply调用，new）变化的问题
 
 ##### js元素的宽高/距离
 

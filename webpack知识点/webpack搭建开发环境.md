@@ -74,10 +74,10 @@ plugin代表要实现的一个语法功能，preset代表的是一系列plugin �
 3.   @babel/preset-env只会转化js句法（语句，代码块），不会转化新的api，比如Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise等全局对象，以及一些定义在全局对象上的方法(Object.assign)都不会转化，所以需要引入`@ babel / polyfill`包，最常见的方式就是在入口文件的第一行写上:
 
      ```javascript
-         import '@babel/polyfill'   // 主要都是为了适配ie
+           import '@babel/polyfill'   // 主要都是为了适配ie
      ```
 
-         这种方式相应的缺点就是包全引入了，相应的按需的引入的方案肯定也有，这里就不赘述啦
+           这种方式相应的缺点就是包全引入了，相应的按需的引入的方案肯定也有，这里就不赘述啦
 
 babelrc配置完了，还需要在webpack的配置中注册babel-loader，将两者链接起来去解析js文件
 

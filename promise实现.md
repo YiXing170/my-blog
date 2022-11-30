@@ -214,7 +214,7 @@ promise.then((res) => {
 });
 
 
-// all 方法
+// all 方法  有点类似数组中的every方法
 Promise.myAll = function(arr) {
   // 1. 返回一个 Promise
   return new Promise((resolve, reject) => {
@@ -247,19 +247,56 @@ Promise.myAll = function(arr) {
   })
 };
 
-// race 方法
+// race 方法  
 Promise.myRace = function(arr) {
   return new Promise((resolve, reject) => {
     for (let i = 0; i < arr.length; i++) {
       arr[i].then((res) => {
         return resolve(res);
       }).catch((err) => {
-        throw new Error(err);
+        reject(err);
       })
     }
   })
 };
 
+
+// any 类似数组中的some
+Promise.myAll = function(arr) {
+  // 1. 返回一个 Promise
+  return new Promise((resolve, reject) => {
+
+    // 2. 设置最终返回结果
+    const result = [];
+
+    // 3. 获取数组的长度以及当前进展索引 index
+    const length = arr.length;
+    let index = 0;
+
+    // 4. 遍历数组，将里面所有内容走一遍
+    for (let i = 0; i < arr.length; i++) {
+
+      // 5 在 .then 里面给 result 设置内容
+      // 如果 index 到了最尾，那么就 resolve(result)
+      // 否则 reject(err)
+      arr[i].then((res) => {
+        resolve(result);
+       
+      }).catch((err) => {
+         result[i] = res;
+        
+        index++;
+
+        if (index === length) {
+          reject(result);
+        }
+      })
+    }
+  })
+};
+
+
+allsettled 相当于map循环 返回promise状态为 fullfilled 值为数组
 
 ```
 
